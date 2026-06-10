@@ -91,7 +91,8 @@ const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
 
     const isMobile = window.innerWidth < 768;
     const PARTICLE_COUNT  = isMobile ? 40 : 80;
-    const bottleBaseY     = isMobile ? -0.2 : -0.1;
+    const bottleBaseY     = isMobile ?  0.1 : -0.1;
+    const bottleBaseX     = isMobile ?  0.0 : -0.3;
 
     // ── Scene / camera / renderer ─────────────────────────────────────────────
     const scene  = new THREE.Scene();
@@ -135,7 +136,7 @@ const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
     // ── Perfume bottle ────────────────────────────────────────────────────────
     const bottleGroup = new THREE.Group();
     // Static offset: shifted left and down
-    bottleGroup.position.set(-0.3, bottleBaseY, 0);
+    bottleGroup.position.set(bottleBaseX, bottleBaseY, 0);
 
     const glassMat = new THREE.MeshStandardMaterial({
       color: 0x2A2018,
