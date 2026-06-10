@@ -1,0 +1,114 @@
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+  background: #F5F4F0;
+}
+
+.admin-sidebar {
+  width: 240px;
+  background: var(--charcoal);
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  flex-shrink: 0;
+}
+
+.admin-sidebar__logo {
+  padding: 28px 24px 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.admin-sidebar__logo span:first-child {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  color: var(--gold);
+}
+
+.admin-sidebar__admin-badge {
+  font-size: 9px !important;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.4) !important;
+  font-family: var(--font-body) !important;
+  font-weight: 400 !important;
+}
+
+.admin-sidebar__nav {
+  flex: 1;
+  padding: 20px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.admin-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 400;
+  color: rgba(255,255,255,0.6);
+  text-decoration: none;
+  transition: var(--transition);
+  position: relative;
+}
+
+.admin-nav-link:hover {
+  background: rgba(255,255,255,0.06);
+  color: var(--white);
+}
+
+.admin-nav-link.active {
+  background: rgba(201,168,76,0.15);
+  color: var(--gold);
+}
+
+.admin-nav-badge {
+  margin-left: auto;
+  background: var(--gold);
+  color: var(--white);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 10px;
+  line-height: 1.5;
+}
+
+.admin-sidebar__logout {
+  margin: 12px;
+  padding: 11px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.4);
+  border-radius: 6px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: var(--font-body);
+  margin-bottom: 20px;
+}
+
+.admin-sidebar__logout:hover {
+  background: rgba(255,255,255,0.06);
+  color: var(--white);
+}
+
+.admin-main {
+  flex: 1;
+  overflow: auto;
+  padding: 32px;
+  min-width: 0;
+}

@@ -1,0 +1,47 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,600&family=Jost:wght@300;400;500;600&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --gold: #C9A84C;
+  --gold-light: #E8D5A3;
+  --gold-dark: #8B6914;
+  --cream: #FAF8F3;
+  --cream-dark: #F0EBE0;
+  --charcoal: #1A1814;
+  --charcoal-mid: #2D2A25;
+  --warm-gray: #6B6560;
+  --warm-gray-light: #A8A39D;
+  --white: #FFFFFF;
+  --shadow-soft: 0 4px 32px rgba(26,24,20,0.08);
+  --shadow-card: 0 2px 16px rgba(26,24,20,0.06);
+  --transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+  --font-display: 'Cormorant Garamond', serif;
+  --font-body: 'Jost', sans-serif;
+  --nav-height: 80px;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--cream);
+  color: var(--charcoal);
+  -webkit-font-smoothing: antialiased;
+}
+
+a { text-decoration: none; color: inherit; }
+button { cursor: pointer; font-family: var(--font-body); border: none; background: none; }
+input, textarea, select { font-family: var(--font-body); }
+img { max-width: 100%; }
+
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+@media (max-width: 768px) {
+  .container { padding: 0 20px; }
+  :root { --nav-height: 64px; }
+}
