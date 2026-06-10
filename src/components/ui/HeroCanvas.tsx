@@ -17,7 +17,6 @@ function makeSharpStar4(size: number): THREE.ExtrudeGeometry {
   return new THREE.ExtrudeGeometry(shape, { depth: 0.02, bevelEnabled: false });
 }
 
-// Canvas texture label — draws store branding onto a 512×512 canvas
 function makeBottleLabel(): {
   geo: THREE.PlaneGeometry;
   mat: THREE.MeshBasicMaterial;
@@ -28,54 +27,54 @@ function makeBottleLabel(): {
   canvas.height = 512;
   const ctx = canvas.getContext('2d')!;
 
-  // Background tint
-  ctx.fillStyle = 'rgba(201, 168, 76, 0.08)';
+  // Dark background
+  ctx.fillStyle = '#0A0805';
   ctx.fillRect(0, 0, 512, 512);
 
   // Outer border
-  ctx.strokeStyle = 'rgba(201, 168, 76, 0.6)';
-  ctx.lineWidth = 2;
-  ctx.strokeRect(20, 20, 472, 472);
+  ctx.strokeStyle = 'rgba(201, 168, 76, 0.8)';
+  ctx.lineWidth = 3;
+  ctx.strokeRect(18, 18, 476, 476);
 
   const drawDecorLine = (y: number) => {
-    ctx.strokeStyle = 'rgba(201, 168, 76, 0.7)';
+    ctx.strokeStyle = 'rgba(201, 168, 76, 0.9)';
     ctx.lineWidth = 1.5;
-    // Left segment
-    ctx.beginPath(); ctx.moveTo(44, y); ctx.lineTo(218, y); ctx.stroke();
-    // Diamond
+    ctx.beginPath(); ctx.moveTo(44, y); ctx.lineTo(216, y); ctx.stroke();
     ctx.beginPath();
-    ctx.moveTo(256, y - 12);
-    ctx.lineTo(270, y);
-    ctx.lineTo(256, y + 12);
-    ctx.lineTo(242, y);
-    ctx.closePath();
-    ctx.stroke();
-    // Right segment
-    ctx.beginPath(); ctx.moveTo(294, y); ctx.lineTo(468, y); ctx.stroke();
+    ctx.moveTo(256, y - 13); ctx.lineTo(272, y);
+    ctx.lineTo(256, y + 13); ctx.lineTo(240, y);
+    ctx.closePath(); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(296, y); ctx.lineTo(468, y); ctx.stroke();
   };
 
-  // Top decorative line
-  drawDecorLine(140);
+  drawDecorLine(138);
 
-  // Store name
-  ctx.fillStyle = 'rgba(201, 168, 76, 0.95)';
-  ctx.font = '700 72px serif';
+  // Store name — bright solid gold
+  ctx.fillStyle = '#C9A84C';
+  ctx.font = '800 80px serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'alphabetic';
-  ctx.fillText("ZACK'S", 256, 240);
+  ctx.fillText("ZACK'S", 256, 242);
 
-  // Sub name
-  ctx.fillStyle = 'rgba(201, 168, 76, 0.8)';
-  ctx.font = '300 38px serif';
-  ctx.fillText('PERFUME', 256, 295);
+  // "PERFUME" with manual letter spacing (TypeScript 4.9 has no ctx.letterSpacing)
+  ctx.fillStyle = 'rgba(201, 168, 76, 0.9)';
+  ctx.font = '300 42px serif';
+  const word    = 'PERFUME';
+  const gap     = 9;
+  const widths  = [...word].map(ch => ctx.measureText(ch).width);
+  const totalW  = widths.reduce((a, b) => a + b, 0) + gap * (word.length - 1);
+  let cx = 256 - totalW / 2;
+  [...word].forEach((ch, k) => {
+    ctx.fillText(ch, cx + widths[k] / 2, 300);
+    cx += widths[k] + gap;
+  });
 
-  // Bottom decorative line
-  drawDecorLine(360);
+  drawDecorLine(362);
 
-  // Tiny bottom text
-  ctx.fillStyle = 'rgba(201, 168, 76, 0.5)';
-  ctx.font = '200 22px sans-serif';
-  ctx.fillText('EAU DE PARFUM', 256, 410);
+  // Bottom small text
+  ctx.fillStyle = 'rgba(201, 168, 76, 0.6)';
+  ctx.font = '300 20px sans-serif';
+  ctx.fillText('EAU DE PARFUM', 256, 412);
 
   const tex = new THREE.CanvasTexture(canvas);
   const geo = new THREE.PlaneGeometry(0.85, 0.95);
@@ -91,7 +90,8 @@ const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
     if (!el) return;
 
     const isMobile = window.innerWidth <= 768;
-    const PARTICLE_COUNT = isMobile ? 40 : 80;
+    const PARTICLE_COUNT  = isMobile ? 40 : 80;
+    const bottleBaseY     = isMobile ? -0.4 : -0.1;
 
     // ── Scene / camera / renderer ─────────────────────────────────────────────
     const scene  = new THREE.Scene();
@@ -120,27 +120,22 @@ const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
     pl3.position.set(0, -3, 2);
     scene.add(pl3);
 
-    // Front key — offset so no blown-out center spot
     const frontLight = new THREE.PointLight(0xffffff, 1.0, 14);
     frontLight.position.set(1.5, 1.5, 4);
     scene.add(frontLight);
 
-    // Gold rim — left edge
     const rimLight = new THREE.PointLight(0xC9A84C, 1.0, 10);
     rimLight.position.set(-3, 1, 2);
     scene.add(rimLight);
 
-    // Soft right fill
     const rightFill = new THREE.PointLight(0xE8D5A3, 0.6, 12);
     rightFill.position.set(3, 0, 2);
     scene.add(rightFill);
 
     // ── Perfume bottle ────────────────────────────────────────────────────────
-    //  body    : y -0.750 → +0.750  (center  0.000)
-    //  neck    : y  0.780 → +0.960  (center  0.870)
-    //  capRing : y  1.040 → +1.080  (center  1.060)
-    //  cap     : y  1.070 → +1.290  (center  1.180)
     const bottleGroup = new THREE.Group();
+    // Static offset: shifted left and down
+    bottleGroup.position.set(-0.3, bottleBaseY, 0);
 
     const glassMat = new THREE.MeshStandardMaterial({
       color: 0x2A2018,
@@ -160,37 +155,38 @@ const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
       roughness: 0.05,
     });
 
-    // Body — wider, slightly less tall
     const bodyGeo = new THREE.BoxGeometry(1.4, 1.5, 0.55);
     const body    = new THREE.Mesh(bodyGeo, glassMat);
     body.position.y = 0;
     bottleGroup.add(body);
 
-    // Neck — shorter, more tapered
     const neckGeo = new THREE.CylinderGeometry(0.14, 0.18, 0.18, 32);
     const neck    = new THREE.Mesh(neckGeo, glassMat);
     neck.position.y = 0.87;
     bottleGroup.add(neck);
 
-    // Cap detail ring — thin gold band
     const capRingGeo = new THREE.CylinderGeometry(0.21, 0.21, 0.04, 32);
     const capRing    = new THREE.Mesh(capRingGeo, goldMat);
     capRing.position.y = 1.06;
     bottleGroup.add(capRing);
 
-    // Cap — wider, flatter, more luxury
     const capGeo  = new THREE.BoxGeometry(0.45, 0.22, 0.45);
     const capMesh = new THREE.Mesh(capGeo, goldMat);
     capMesh.position.y = 1.18;
     bottleGroup.add(capMesh);
 
-    // Canvas texture label
+    // Label — front and back, same texture
     const { geo: labelGeo, mat: labelMat, tex: labelTex } = makeBottleLabel();
-    const label = new THREE.Mesh(labelGeo, labelMat);
-    label.position.set(0, 0, 0.29);
-    bottleGroup.add(label);
 
-    // Inner glow — breathes with the bottle
+    const frontLabel = new THREE.Mesh(labelGeo, labelMat);
+    frontLabel.position.set(0, 0, 0.29);
+    bottleGroup.add(frontLabel);
+
+    const backLabel = new THREE.Mesh(labelGeo, labelMat);
+    backLabel.position.set(0, 0, -0.29);
+    backLabel.rotation.y = Math.PI;
+    bottleGroup.add(backLabel);
+
     const bottleGlow = new THREE.PointLight(0xC9A84C, 2.0, 8);
     bottleGlow.position.set(0, 0, 0);
     bottleGroup.add(bottleGlow);
@@ -206,24 +202,26 @@ const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
       roughness: 0.0,
     });
 
-    // Outer orbit — 3 stars, radius 2.4, tilted 15°, speed 0.002
-    const outerGeo   = makeSharpStar4(0.18);
-    const outerGroup = new THREE.Group();
+    // Outer orbit — 3 stars, size 0.12, radius 2.4, tilted 15°
+    const outerGeo    = makeSharpStar4(0.12);
+    const outerGroup  = new THREE.Group();
     outerGroup.rotation.x = (15 * Math.PI) / 180;
-    const outerStars: THREE.Mesh[] = [];
-    const outerYOff  = [-0.10, 0.16, -0.06];
+    const outerStars: THREE.Mesh[]  = [];
+    const outerYOff   = [-0.10, 0.16, -0.06];
+    const outerTilts  = [0.3, -0.5, 0.8]; // individual X tilts, also driven by sin wave
     for (let idx = 0; idx < 3; idx++) {
       const a    = (idx / 3) * Math.PI * 2;
       const mesh = new THREE.Mesh(outerGeo, starBaseMat);
       mesh.position.set(Math.cos(a) * 2.4, outerYOff[idx], Math.sin(a) * 2.4);
+      mesh.rotation.x = outerTilts[idx];
       mesh.rotation.y = a;
       outerGroup.add(mesh);
       outerStars.push(mesh);
     }
     scene.add(outerGroup);
 
-    // Middle orbit — 2 stars, radius 1.7, tilted 25°, counter-rotates, speed 0.0035
-    const middleGeo   = makeSharpStar4(0.12);
+    // Middle orbit — 2 stars, size 0.08, radius 1.7, tilted 25°, counter-rotates
+    const middleGeo   = makeSharpStar4(0.08);
     const middleMat   = new THREE.MeshStandardMaterial({
       color: 0xC9A84C,
       emissive: new THREE.Color(0xC9A84C),
@@ -234,15 +232,42 @@ const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
     const middleGroup = new THREE.Group();
     middleGroup.rotation.x = (25 * Math.PI) / 180;
     const middleStars: THREE.Mesh[] = [];
+    // Different rotations on all axes per star
+    const middleInitRot = [
+      { x:  0.4, y: 0.0, z:  0.3 },
+      { x: -0.6, y: 1.0, z: -0.2 },
+    ];
     for (let idx = 0; idx < 2; idx++) {
       const a    = (idx / 2) * Math.PI * 2;
       const mesh = new THREE.Mesh(middleGeo, middleMat);
       mesh.position.set(Math.cos(a) * 1.7, 0, Math.sin(a) * 1.7);
-      mesh.rotation.y = a;
+      mesh.rotation.set(
+        middleInitRot[idx].x,
+        middleInitRot[idx].y + a,
+        middleInitRot[idx].z,
+      );
       middleGroup.add(mesh);
       middleStars.push(mesh);
     }
     scene.add(middleGroup);
+
+    // Fixed accent stars — tiny, very bright, just spin in place
+    const accentGeo = makeSharpStar4(0.05);
+    const accentMat = new THREE.MeshStandardMaterial({
+      color: 0xC9A84C,
+      emissive: new THREE.Color(0xC9A84C),
+      emissiveIntensity: 1.5,
+      metalness: 1.0,
+      roughness: 0.0,
+    });
+
+    const accentStar1 = new THREE.Mesh(accentGeo, accentMat);
+    accentStar1.position.set(0.9, 1.1, 0.6);  // top-right of bottle area
+    scene.add(accentStar1);
+
+    const accentStar2 = new THREE.Mesh(accentGeo, accentMat);
+    accentStar2.position.set(-1.5, -0.9, 0.4); // bottom-left of bottle area
+    scene.add(accentStar2);
 
     // ── Particles ─────────────────────────────────────────────────────────────
     const posArr = new Float32Array(PARTICLE_COUNT * 3);
@@ -359,29 +384,36 @@ const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
       lm.x += (mouse.x - lm.x) * 0.03;
       lm.y += (mouse.y - lm.y) * 0.03;
 
-      // Bottle
-      bottleGroup.rotation.y += 0.004;
-      bottleGroup.position.y  = Math.sin(t * 0.6) * 0.08;
-      bottleGroup.rotation.x += ( lm.y * MAX_TILT - bottleGroup.rotation.x) * 0.04;
-      bottleGroup.rotation.z += (-lm.x * MAX_TILT - bottleGroup.rotation.z) * 0.04;
+      // Bottle: x stays at -0.3, y floats around base offset
+      bottleGroup.rotation.y  += 0.004;
+      bottleGroup.position.y   = bottleBaseY + Math.sin(t * 0.6) * 0.08;
+      bottleGroup.rotation.x  += ( lm.y * MAX_TILT - bottleGroup.rotation.x) * 0.04;
+      bottleGroup.rotation.z  += (-lm.x * MAX_TILT - bottleGroup.rotation.z) * 0.04;
       bottleGlow.intensity = 1.5 + Math.sin(t * 1.2) * 0.5;
 
-      // Outer orbit
+      // Outer orbit + individual sin-wave X tilt
       outerGroup.rotation.y += 0.002;
       outerGroup.rotation.x  = (15 * Math.PI / 180) + lm.y * 0.08;
-      outerStars.forEach((s) => { s.rotation.z += 0.015; });
+      outerStars.forEach((s, k) => {
+        s.rotation.z += 0.015;
+        s.rotation.x  = outerTilts[k] + Math.sin(t * 0.7 + k * 2.1) * 0.2;
+      });
 
-      // Middle orbit — counter-rotates
+      // Middle orbit — counter-rotates, faster individual spin
       middleGroup.rotation.y -= 0.0035;
       middleGroup.rotation.x  = (25 * Math.PI / 180) + lm.y * 0.06;
-      middleStars.forEach((s) => { s.rotation.z += 0.015; });
+      middleStars.forEach((s) => { s.rotation.z += 0.02; });
+
+      // Fixed accent stars — just spin in place
+      accentStar1.rotation.z += 0.010;
+      accentStar2.rotation.z -= 0.008;
 
       // Arabic background
       bgStarLine.rotation.z += 0.0008;
       circLine.rotation.z   -= 0.0004;
       hexLine.rotation.z    += 0.0005;
 
-      // Camera
+      // Camera breathing + mouse track
       camera.position.y  = Math.sin(t * 0.3) * 0.05;
       camera.position.x += (lm.x * 0.1 - camera.position.x) * 0.02;
 
@@ -427,6 +459,7 @@ const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
 
       outerGeo.dispose();   starBaseMat.dispose();
       middleGeo.dispose();  middleMat.dispose();
+      accentGeo.dispose();  accentMat.dispose();
 
       particleGeo.dispose(); particleMat.dispose();
       bgStarGeo.dispose();   bgStarMat.dispose();
