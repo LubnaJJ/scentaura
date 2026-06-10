@@ -17,6 +17,72 @@ function makeSharpStar4(size: number): THREE.ExtrudeGeometry {
   return new THREE.ExtrudeGeometry(shape, { depth: 0.02, bevelEnabled: false });
 }
 
+// Canvas texture label — draws store branding onto a 512×512 canvas
+function makeBottleLabel(): {
+  geo: THREE.PlaneGeometry;
+  mat: THREE.MeshBasicMaterial;
+  tex: THREE.CanvasTexture;
+} {
+  const canvas = document.createElement('canvas');
+  canvas.width  = 512;
+  canvas.height = 512;
+  const ctx = canvas.getContext('2d')!;
+
+  // Background tint
+  ctx.fillStyle = 'rgba(201, 168, 76, 0.08)';
+  ctx.fillRect(0, 0, 512, 512);
+
+  // Outer border
+  ctx.strokeStyle = 'rgba(201, 168, 76, 0.6)';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(20, 20, 472, 472);
+
+  const drawDecorLine = (y: number) => {
+    ctx.strokeStyle = 'rgba(201, 168, 76, 0.7)';
+    ctx.lineWidth = 1.5;
+    // Left segment
+    ctx.beginPath(); ctx.moveTo(44, y); ctx.lineTo(218, y); ctx.stroke();
+    // Diamond
+    ctx.beginPath();
+    ctx.moveTo(256, y - 12);
+    ctx.lineTo(270, y);
+    ctx.lineTo(256, y + 12);
+    ctx.lineTo(242, y);
+    ctx.closePath();
+    ctx.stroke();
+    // Right segment
+    ctx.beginPath(); ctx.moveTo(294, y); ctx.lineTo(468, y); ctx.stroke();
+  };
+
+  // Top decorative line
+  drawDecorLine(140);
+
+  // Store name
+  ctx.fillStyle = 'rgba(201, 168, 76, 0.95)';
+  ctx.font = '700 72px serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillText("ZACK'S", 256, 240);
+
+  // Sub name
+  ctx.fillStyle = 'rgba(201, 168, 76, 0.8)';
+  ctx.font = '300 38px serif';
+  ctx.fillText('PERFUME', 256, 295);
+
+  // Bottom decorative line
+  drawDecorLine(360);
+
+  // Tiny bottom text
+  ctx.fillStyle = 'rgba(201, 168, 76, 0.5)';
+  ctx.font = '200 22px sans-serif';
+  ctx.fillText('EAU DE PARFUM', 256, 410);
+
+  const tex = new THREE.CanvasTexture(canvas);
+  const geo = new THREE.PlaneGeometry(0.85, 0.95);
+  const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true });
+  return { geo, mat, tex };
+}
+
 const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
   const mountRef = useRef<HTMLDivElement>(null);
 
@@ -42,36 +108,38 @@ const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
     // ── Lights ───────────────────────────────────────────────────────────────
     scene.add(new THREE.AmbientLight(0xffffff, 0.3));
 
-    // Warm fill from top-right
     const pl1 = new THREE.PointLight(0xC9A84C, 3, 20);
     pl1.position.set(3, 3, 3);
     scene.add(pl1);
 
-    // Soft warm fill from bottom-left
     const pl2 = new THREE.PointLight(0xE8D5A3, 1.5, 20);
     pl2.position.set(-3, -2, 2);
     scene.add(pl2);
 
-    // Uplight from below
     const pl3 = new THREE.PointLight(0xC9A84C, 2, 15);
     pl3.position.set(0, -3, 2);
     scene.add(pl3);
 
-    // Front key light — white, illuminates bottle clearly
-    const frontLight = new THREE.PointLight(0xffffff, 1.5, 12);
-    frontLight.position.set(0, 0, 4);
+    // Front key — offset so no blown-out center spot
+    const frontLight = new THREE.PointLight(0xffffff, 1.0, 14);
+    frontLight.position.set(1.5, 1.5, 4);
     scene.add(frontLight);
 
-    // Gold rim light — left side edge glow
+    // Gold rim — left edge
     const rimLight = new THREE.PointLight(0xC9A84C, 1.0, 10);
     rimLight.position.set(-3, 1, 2);
     scene.add(rimLight);
 
+    // Soft right fill
+    const rightFill = new THREE.PointLight(0xE8D5A3, 0.6, 12);
+    rightFill.position.set(3, 0, 2);
+    scene.add(rightFill);
+
     // ── Perfume bottle ────────────────────────────────────────────────────────
-    //  body    : y -1.145 → +0.455  (center -0.345)
-    //  neck    : y +0.455 → +0.805  (center  0.630)
-    //  capRing : y +0.805 → +0.865  (center  0.835)
-    //  cap     : y +0.865 → +1.145  (center  1.005)
+    //  body    : y -0.750 → +0.750  (center  0.000)
+    //  neck    : y  0.780 → +0.960  (center  0.870)
+    //  capRing : y  1.040 → +1.080  (center  1.060)
+    //  cap     : y  1.070 → +1.290  (center  1.180)
     const bottleGroup = new THREE.Group();
 
     const glassMat = new THREE.MeshStandardMaterial({
@@ -92,34 +160,34 @@ const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
       roughness: 0.05,
     });
 
-    const bodyGeo = new THREE.BoxGeometry(1.2, 1.6, 0.6);
+    // Body — wider, slightly less tall
+    const bodyGeo = new THREE.BoxGeometry(1.4, 1.5, 0.55);
     const body    = new THREE.Mesh(bodyGeo, glassMat);
-    body.position.y = -0.345;
+    body.position.y = 0;
     bottleGroup.add(body);
 
-    const neckGeo = new THREE.CylinderGeometry(0.18, 0.22, 0.35, 32);
+    // Neck — shorter, more tapered
+    const neckGeo = new THREE.CylinderGeometry(0.14, 0.18, 0.18, 32);
     const neck    = new THREE.Mesh(neckGeo, glassMat);
-    neck.position.y = 0.63;
+    neck.position.y = 0.87;
     bottleGroup.add(neck);
 
-    const capRingGeo = new THREE.CylinderGeometry(0.21, 0.21, 0.06, 32);
+    // Cap detail ring — thin gold band
+    const capRingGeo = new THREE.CylinderGeometry(0.21, 0.21, 0.04, 32);
     const capRing    = new THREE.Mesh(capRingGeo, goldMat);
-    capRing.position.y = 0.835;
+    capRing.position.y = 1.06;
     bottleGroup.add(capRing);
 
-    const capGeo  = new THREE.BoxGeometry(0.38, 0.28, 0.38);
+    // Cap — wider, flatter, more luxury
+    const capGeo  = new THREE.BoxGeometry(0.45, 0.22, 0.45);
     const capMesh = new THREE.Mesh(capGeo, goldMat);
-    capMesh.position.y = 1.005;
+    capMesh.position.y = 1.18;
     bottleGroup.add(capMesh);
 
-    const labelGeo = new THREE.PlaneGeometry(0.7, 0.8);
-    const labelMat = new THREE.MeshStandardMaterial({
-      color: 0xC9A84C,
-      transparent: true,
-      opacity: 0.06,
-    });
+    // Canvas texture label
+    const { geo: labelGeo, mat: labelMat, tex: labelTex } = makeBottleLabel();
     const label = new THREE.Mesh(labelGeo, labelMat);
-    label.position.set(0, -0.345, 0.31);
+    label.position.set(0, 0, 0.29);
     bottleGroup.add(label);
 
     // Inner glow — breathes with the bottle
@@ -139,11 +207,11 @@ const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
     });
 
     // Outer orbit — 3 stars, radius 2.4, tilted 15°, speed 0.002
-    const outerGeo    = makeSharpStar4(0.18);
-    const outerGroup  = new THREE.Group();
+    const outerGeo   = makeSharpStar4(0.18);
+    const outerGroup = new THREE.Group();
     outerGroup.rotation.x = (15 * Math.PI) / 180;
     const outerStars: THREE.Mesh[] = [];
-    const outerYOff   = [-0.10, 0.16, -0.06];
+    const outerYOff  = [-0.10, 0.16, -0.06];
     for (let idx = 0; idx < 3; idx++) {
       const a    = (idx / 3) * Math.PI * 2;
       const mesh = new THREE.Mesh(outerGeo, starBaseMat);
@@ -353,12 +421,12 @@ const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
       el.removeEventListener('mousemove', onMouseMove);
       if (isMobile) window.removeEventListener('deviceorientation', onOrientation);
 
-      bodyGeo.dispose();   neckGeo.dispose();   capRingGeo.dispose();
-      capGeo.dispose();    labelGeo.dispose();
-      glassMat.dispose();  goldMat.dispose();   labelMat.dispose();
+      bodyGeo.dispose();    neckGeo.dispose();    capRingGeo.dispose();
+      capGeo.dispose();     labelGeo.dispose();   labelTex.dispose();
+      glassMat.dispose();   goldMat.dispose();    labelMat.dispose();
 
-      outerGeo.dispose();  starBaseMat.dispose();
-      middleGeo.dispose(); middleMat.dispose();
+      outerGeo.dispose();   starBaseMat.dispose();
+      middleGeo.dispose();  middleMat.dispose();
 
       particleGeo.dispose(); particleMat.dispose();
       bgStarGeo.dispose();   bgStarMat.dispose();
