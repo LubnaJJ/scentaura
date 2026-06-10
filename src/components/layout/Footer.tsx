@@ -2,16 +2,17 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Phone, Mail, MapPin, MessageCircle } from 'lucide-react';
 import { openWhatsApp } from '../../utils/helpers';
+import { useStore } from '../../store/useStore';
 import './Footer.css';
 
-const Footer: React.FC = () => (
+const Footer: React.FC = () => {
+  const storeSettings = useStore((s) => s.storeSettings);
+  return (
   <footer className="footer">
     <div className="footer__top container">
       <div className="footer__brand">
-        <div className="footer__logo">SCENTAURA</div>
-        <p className="footer__tagline">
-          Curating the finest Arabic fragrances for the discerning man in Sri Lanka.
-        </p>
+        <div className="footer__logo">{storeSettings.storeName}</div>
+        <p className="footer__tagline">{storeSettings.footerTagline}</p>
         <button
           className="footer__whatsapp"
           onClick={() => openWhatsApp('Hello, I would like to inquire about your perfumes.')}
@@ -39,11 +40,11 @@ const Footer: React.FC = () => (
 
       <div className="footer__col">
         <h4>Contact</h4>
-        <a href="tel:+94771234567" className="footer__contact-item">
-          <Phone size={14} /> +94 77 123 4567
+        <a href={`tel:+${storeSettings.whatsappNumber}`} className="footer__contact-item">
+          <Phone size={14} /> +{storeSettings.whatsappNumber}
         </a>
-        <a href="mailto:hello@scentaura.lk" className="footer__contact-item">
-          <Mail size={14} /> hello@scentaura.lk
+        <a href={`mailto:${storeSettings.contactEmail}`} className="footer__contact-item">
+          <Mail size={14} /> {storeSettings.contactEmail}
         </a>
         <div className="footer__contact-item">
           <MapPin size={14} /> Colombo, Sri Lanka
@@ -56,6 +57,7 @@ const Footer: React.FC = () => (
       <p>Cash on Delivery · Island-wide Delivery · Authentic Arabic Perfumes</p>
     </div>
   </footer>
-);
+  );
+};
 
 export default Footer;

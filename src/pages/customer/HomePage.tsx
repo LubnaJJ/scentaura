@@ -10,6 +10,7 @@ import './HomePage.css';
 const HomePage: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const products = useStore((s) => s.products);
+  const storeSettings = useStore((s) => s.storeSettings);
   const featured = products.filter((p) => p.featured);
   const bestsellers = products.filter((p) => p.bestseller);
 
@@ -144,15 +145,9 @@ const HomePage: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: [0.4, 0, 0.2, 1] }}
           >
-            <p className="hero__eyebrow">Arabian Perfumery · Sri Lanka</p>
-            <h1 className="hero__title">
-              Wear the<br />
-              <em>Soul of Arabia</em>
-            </h1>
-            <p className="hero__subtitle">
-              Authentic Arabic fragrances, curated for the man who commands presence.
-              Rare Ouds, sacred Ambers, and precious Musks — delivered to your door.
-            </p>
+            <p className="hero__eyebrow">{storeSettings.heroEyebrow}</p>
+            <h1 className="hero__title">{storeSettings.heroTitle}</h1>
+            <p className="hero__subtitle">{storeSettings.heroSubtitle}</p>
             <div className="hero__actions">
               <Link to="/shop" className="btn btn--gold">
                 Explore Collection <ArrowRight size={16} />

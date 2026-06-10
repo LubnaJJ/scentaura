@@ -9,6 +9,7 @@ const Navbar: React.FC = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
   const cartCount = useStore((s) => s.cartCount());
+  const storeSettings = useStore((s) => s.storeSettings);
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 40);
@@ -27,8 +28,8 @@ const Navbar: React.FC = () => {
     <nav className={`navbar ${scrolled ? 'navbar--scrolled' : ''} ${transparent ? 'navbar--transparent' : ''}`}>
       <div className="navbar__inner container">
         <Link to="/" className="navbar__logo">
-          <span className="navbar__logo-text">SCENTAURA</span>
-          <span className="navbar__logo-sub">Arabian Fragrances</span>
+          <span className="navbar__logo-text">{storeSettings.storeName}</span>
+          <span className="navbar__logo-sub">{storeSettings.storeTagline}</span>
         </Link>
 
         <ul className="navbar__links">

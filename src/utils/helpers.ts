@@ -1,3 +1,5 @@
+import { useStore } from '../store/useStore';
+
 export const formatPrice = (price: number): string =>
   `Rs. ${price.toLocaleString('en-LK')}`;
 
@@ -13,13 +15,15 @@ export const formatDate = (iso: string): string =>
     minute: '2-digit',
   });
 
+// Fallback constants — used before store initialises
 export const WHATSAPP_NUMBER = '94771770771';
 export const ADMIN_EMAIL = 'admin@scentaura.lk';
 export const CONTACT_EMAIL = 'hello@scentaura.lk';
 
 export const openWhatsApp = (message: string) => {
-  const encoded = encodeURIComponent(message);
-  window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encoded}`, '_blank');
+  const { storeSettings } = useStore.getState();
+  const number = storeSettings?.whatsappNumber || WHATSAPP_NUMBER;
+  window.open(`https://wa.me/${number}?text=${encodeURIComponent(message)}`, '_blank');
 };
 
 export const STATUS_LABELS: Record<string, string> = {

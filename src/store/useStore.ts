@@ -1,7 +1,28 @@
 import { create } from 'zustand';
-import { CartItem, Product, Order, Inquiry } from '../types';
+import { CartItem, Product, Order, Inquiry, StoreSettings } from '../types';
 import * as fs from '../lib/firestore';
 import { adminLogin as fbLogin, adminLogout as fbLogout } from '../lib/auth';
+
+const SETTINGS_KEY = 'scentaura_settings';
+
+const DEFAULT_SETTINGS: StoreSettings = {
+  storeName: 'SCENTAURA',
+  storeTagline: 'Arabian Fragrances',
+  heroTitle: 'Wear the Soul of Arabia',
+  heroSubtitle: 'Authentic Arabic fragrances, curated for the man who commands presence. Rare Ouds, sacred Ambers, and precious Musks — delivered to your door.',
+  heroEyebrow: 'Arabian Perfumery · Sri Lanka',
+  whatsappNumber: '94771770771',
+  contactEmail: 'hello@scentaura.lk',
+  footerTagline: 'Curating the finest Arabic fragrances for the discerning man in Sri Lanka.',
+};
+
+function loadSettings(): StoreSettings {
+  try {
+    const raw = localStorage.getItem(SETTINGS_KEY);
+    if (raw) return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
+  } catch {}
+  return { ...DEFAULT_SETTINGS };
+}
 
 interface StoreState {
   // Data
@@ -41,6 +62,10 @@ interface StoreState {
   adminLogin: (email: string, password: string) => Promise<boolean>;
   adminLogout: () => void;
 
+  // Store settings (persisted to localStorage)
+  storeSettings: StoreSettings;
+  updateStoreSettings: (updates: Partial<StoreSettings>) => void;
+
   // Initialisation — called once from App on mount
   initStore: () => Promise<void>;
 }
@@ -52,6 +77,7 @@ export const useStore = create<StoreState>()((set, get) => ({
   cart: [],
   isAdminLoggedIn: false,
   authLoading: true,
+  storeSettings: loadSettings(),
 
   // ── Products ────────────────────────────────────────────────────────────
   addProduct: (product) => {
@@ -164,6 +190,15 @@ export const useStore = create<StoreState>()((set, get) => ({
       ),
     }));
     fs.markInquiryRead(id).catch(console.error);
+  },
+
+  // ── Settings ────────────────────────────────────────────────────────────
+  updateStoreSettings: (updates) => {
+    set((s) => {
+      const next = { ...s.storeSettings, ...updates };
+      try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(next)); } catch {}
+      return { storeSettings: next };
+    });
   },
 
   // ── Auth ────────────────────────────────────────────────────────────────

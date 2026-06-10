@@ -24,6 +24,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminProductsPage from './pages/admin/AdminProductsPage';
 import AdminOrdersPage from './pages/admin/AdminOrdersPage';
 import AdminInquiriesPage from './pages/admin/AdminInquiriesPage';
+import AdminSettingsPage from './pages/admin/AdminSettingsPage';
 
 const App: React.FC = () => {
   useEffect(() => {
@@ -80,6 +81,7 @@ const App: React.FC = () => {
           <Route path="products" element={<AdminProductsPage />} />
           <Route path="orders" element={<AdminOrdersPage />} />
           <Route path="inquiries" element={<AdminInquiriesPage />} />
+          <Route path="settings" element={<AdminSettingsPage />} />
         </Route>
 
         {/* Fallback */}

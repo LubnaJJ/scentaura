@@ -60,5 +60,16 @@ export interface AdminUser {
   password: string;
 }
 
+export interface StoreSettings {
+  storeName: string;
+  storeTagline: string;
+  heroTitle: string;
+  heroSubtitle: string;
+  heroEyebrow: string;
+  whatsappNumber: string;
+  contactEmail: string;
+  footerTagline: string;
+}
+
 export type OrderStatus = Order['status'];
 export type ProductCategory = Product['category'];

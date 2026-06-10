@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Package, ShoppingBag, MessageSquare, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingBag, MessageSquare, Settings, LogOut, Menu, X } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import toast from 'react-hot-toast';
 import './AdminLayout.css';
@@ -49,6 +49,9 @@ const AdminLayout: React.FC = () => {
             <MessageSquare size={18} />
             <span>Inquiries</span>
             {unreadInquiries > 0 && <span className="admin-nav-badge">{unreadInquiries}</span>}
+          </NavLink>
+          <NavLink to="/admin/settings" onClick={closeNav} className={({ isActive }) => `admin-nav-link ${isActive ? 'active' : ''}`}>
+            <Settings size={18} /> Settings
           </NavLink>
         </nav>
 
