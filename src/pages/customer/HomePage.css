@@ -1,71 +1,181 @@
-/* Hero */
+/* ── Hero ──────────────────────────────────────────────────────────────── */
 .hero {
   position: relative;
-  height: 100vh;
-  min-height: 700px;
-  display: flex;
-  align-items: center;
-  background: var(--charcoal);
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1A1814 0%, #2D2520 50%, #1A1814 100%);
   overflow: hidden;
+  display: flex;
+  align-items: stretch;
 }
 
-.hero__canvas {
-  position: absolute;
-  inset: 0;
+.hero__inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  align-items: center;
+  min-height: 100vh;
+  padding-top: 112px;
+  padding-bottom: 88px;
   width: 100%;
-  height: 100%;
-  max-width: 100%;
 }
 
-.hero__overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(26,24,20,0.85) 0%, rgba(26,24,20,0.4) 60%, rgba(26,24,20,0.6) 100%);
-}
-
-.hero__content {
-  position: relative;
-  z-index: 2;
-  max-width: 640px;
+/* Left — text */
+.hero__left {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .hero__eyebrow {
-  font-size: 11px;
+  font-size: 10px;
   letter-spacing: 4px;
   text-transform: uppercase;
   color: var(--gold);
-  margin-bottom: 20px;
+  margin-bottom: 28px;
   font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.hero__eyebrow::before {
+  content: '';
+  display: block;
+  width: 44px;
+  height: 1px;
+  background: linear-gradient(90deg, var(--gold), transparent);
+  flex-shrink: 0;
 }
 
 .hero__title {
   font-family: var(--font-display);
-  font-size: clamp(52px, 7vw, 90px);
+  font-size: clamp(52px, 5.5vw, 88px);
   font-weight: 300;
-  line-height: 1.05;
+  line-height: 1.06;
   color: var(--white);
-  margin-bottom: 24px;
+  margin-bottom: 32px;
+  letter-spacing: -0.5px;
 }
 
 .hero__title em {
   font-style: italic;
   color: var(--gold);
+  display: block;
 }
 
 .hero__subtitle {
-  font-size: 15px;
-  line-height: 1.8;
-  color: rgba(255,255,255,0.72);
-  margin-bottom: 40px;
-  max-width: 500px;
+  font-size: 13px;
+  line-height: 1.85;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 48px;
+  max-width: 420px;
 }
 
 .hero__actions {
   display: flex;
-  gap: 16px;
+  gap: 14px;
   flex-wrap: wrap;
 }
 
+/* Right — bottle */
+.hero__right {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 480px;
+}
+
+/* Golden radial glow behind bottle */
+.hero__glow {
+  position: absolute;
+  width: 520px;
+  height: 520px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(201, 168, 76, 0.18) 0%,
+    rgba(201, 168, 76, 0.06) 45%,
+    transparent 70%
+  );
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+/* 3D tilt scene */
+.hero__bottle-scene {
+  perspective: 1000px;
+  position: relative;
+  z-index: 2;
+}
+
+.hero__bottle-card {
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.hero__bottle-img {
+  width: 100%;
+  max-width: 360px;
+  height: auto;
+  display: block;
+  border-radius: 12px;
+  filter:
+    drop-shadow(0 48px 72px rgba(0, 0, 0, 0.7))
+    drop-shadow(0 12px 32px rgba(201, 168, 76, 0.22));
+  user-select: none;
+  pointer-events: none;
+}
+
+/* Soft elliptical glow under bottle */
+.hero__bottle-shadow {
+  position: absolute;
+  bottom: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 55%;
+  height: 32px;
+  background: radial-gradient(ellipse, rgba(201, 168, 76, 0.32) 0%, transparent 70%);
+  filter: blur(10px);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── Floating particles ─────────────────────────────────────────────────── */
+.hero__particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.hero__particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--gold);
+  opacity: 0;
+  animation: floatUp linear infinite;
+}
+
+@keyframes floatUp {
+  0%   { opacity: 0;    transform: translateY(0)    scale(1); }
+  15%  { opacity: 0.65; }
+  80%  { opacity: 0.1; }
+  100% { opacity: 0;    transform: translateY(-96px) scale(0.3); }
+}
+
+.hero__particle--1 { bottom: 28%; left: 12%; animation-duration: 5.2s; animation-delay: 0s;   width: 3px; height: 3px; }
+.hero__particle--2 { bottom: 18%; left: 62%; animation-duration: 6.1s; animation-delay: 0.9s; }
+.hero__particle--3 { bottom: 38%; left: 82%; animation-duration: 4.6s; animation-delay: 1.8s; width: 3px; height: 3px; }
+.hero__particle--4 { bottom: 52%; left: 28%; animation-duration: 5.8s; animation-delay: 2.7s; width: 5px; height: 5px; }
+.hero__particle--5 { bottom: 22%; left: 48%; animation-duration: 4.1s; animation-delay: 3.6s; }
+.hero__particle--6 { bottom: 44%; left: 8%;  animation-duration: 6.4s; animation-delay: 1.3s; width: 3px; height: 3px; }
+
+/* ── Scroll hint ────────────────────────────────────────────────────────── */
 .hero__scroll-hint {
   position: absolute;
   bottom: 40px;
@@ -75,14 +185,14 @@
   flex-direction: column;
   align-items: center;
   gap: 8px;
-  z-index: 2;
+  z-index: 3;
 }
 
 .hero__scroll-line {
   width: 1px;
   height: 50px;
-  background: linear-gradient(to bottom, var(--gold), transparent);
-  animation: scrollPulse 2s ease-in-out infinite;
+  background: linear-gradient(to bottom, rgba(201, 168, 76, 0.8), transparent);
+  animation: scrollPulse 2.2s ease-in-out infinite;
 }
 
 .hero__scroll-hint span {
@@ -90,14 +200,15 @@
   letter-spacing: 3px;
   text-transform: uppercase;
   color: var(--gold);
+  opacity: 0.6;
 }
 
 @keyframes scrollPulse {
   0%, 100% { opacity: 0.4; transform: scaleY(1); }
-  50% { opacity: 1; transform: scaleY(1.1); }
+  50%       { opacity: 1;   transform: scaleY(1.12); }
 }
 
-/* Buttons */
+/* ── Buttons ────────────────────────────────────────────────────────────── */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -121,7 +232,7 @@
 .btn--gold:hover {
   background: var(--gold-dark);
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(201,168,76,0.3);
+  box-shadow: 0 8px 24px rgba(201, 168, 76, 0.3);
 }
 
 .btn--gold-outline {
@@ -138,7 +249,7 @@
 .btn--outline-light {
   background: transparent;
   color: var(--white);
-  border: 1px solid rgba(255,255,255,0.4);
+  border: 1px solid rgba(255, 255, 255, 0.35);
 }
 .btn--outline-light:hover {
   border-color: var(--gold);
@@ -156,7 +267,7 @@
   transform: translateY(-2px);
 }
 
-/* Trust bar */
+/* ── Trust bar ──────────────────────────────────────────────────────────── */
 .trust-bar {
   background: var(--white);
   border-bottom: 1px solid var(--cream-dark);
@@ -192,7 +303,7 @@
   margin-top: 2px;
 }
 
-/* Sections */
+/* ── Sections ───────────────────────────────────────────────────────────── */
 .section {
   padding: 80px 0;
 }
@@ -230,7 +341,7 @@
   margin-top: 48px;
 }
 
-/* Brand strip */
+/* ── Brand strip ────────────────────────────────────────────────────────── */
 .brand-strip {
   background: var(--charcoal);
   padding: 80px 0;
@@ -255,7 +366,7 @@
 .brand-strip__body {
   font-size: 14px;
   line-height: 1.9;
-  color: rgba(255,255,255,0.65);
+  color: rgba(255, 255, 255, 0.65);
 }
 
 .brand-strip__visual {
@@ -263,10 +374,8 @@
   flex-direction: column;
   gap: 40px;
   padding-left: 40px;
-  border-left: 1px solid rgba(201,168,76,0.25);
+  border-left: 1px solid rgba(201, 168, 76, 0.25);
 }
-
-.brand-strip__stat {}
 
 .brand-strip__num {
   display: block;
@@ -281,12 +390,12 @@
   font-size: 12px;
   letter-spacing: 1.5px;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.5);
+  color: rgba(255, 255, 255, 0.5);
   margin-top: 6px;
   display: block;
 }
 
-/* CTA banner */
+/* ── CTA banner ─────────────────────────────────────────────────────────── */
 .cta-banner {
   padding: 0 0 80px;
 }
@@ -321,32 +430,63 @@
   gap: 16px;
 }
 
-/* Responsive */
+/* ── Responsive ─────────────────────────────────────────────────────────── */
 @media (max-width: 1024px) {
   .products-grid { grid-template-columns: repeat(2, 1fr); }
   .trust-bar__inner { grid-template-columns: repeat(2, 1fr); }
+  .hero__inner { gap: 40px; }
+  .hero__bottle-img { max-width: 300px; }
 }
 
 @media (max-width: 768px) {
-  .hero { min-height: 600px; }
+  /* Stack hero vertically */
+  .hero__inner {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    padding-top: 96px;
+    padding-bottom: 64px;
+    min-height: 100svh;
+    align-content: center;
+  }
+  .hero__left {
+    text-align: center;
+    align-items: center;
+    order: 1;
+  }
+  .hero__eyebrow::before { display: none; }
+  .hero__subtitle { max-width: 100%; }
+  .hero__right {
+    order: 2;
+    min-height: 280px;
+  }
+  .hero__bottle-img { max-width: 240px; }
+  .hero__glow { width: 320px; height: 320px; }
+
+  /* Hide 3 particles on mobile */
+  .hero__particle--4,
+  .hero__particle--5,
+  .hero__particle--6 { display: none; }
+
   .products-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
   .trust-bar__inner { grid-template-columns: 1fr; }
   .brand-strip__inner { grid-template-columns: 1fr; gap: 40px; }
-  .brand-strip__visual { border-left: none; padding-left: 0; border-top: 1px solid rgba(201,168,76,0.25); padding-top: 40px; flex-direction: row; flex-wrap: wrap; }
+  .brand-strip__visual {
+    border-left: none;
+    padding-left: 0;
+    border-top: 1px solid rgba(201, 168, 76, 0.25);
+    padding-top: 40px;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
   .cta-banner__inner { padding: 40px 24px; }
   .section { padding: 56px 0; }
 }
 
-@media (max-width: 360px) {
-  .products-grid { grid-template-columns: 1fr; }
-}
-
 @media (max-width: 480px) {
-  .hero { min-height: 520px; height: 100svh; }
-  .hero__title { font-size: clamp(36px, 10vw, 52px); }
-  .hero__subtitle { font-size: 14px; margin-bottom: 28px; }
-  .hero__actions { flex-direction: column; gap: 12px; }
+  .hero__title { font-size: clamp(40px, 11vw, 56px); }
+  .hero__actions { flex-direction: column; width: 100%; }
   .hero__actions .btn { width: 100%; justify-content: center; }
+  .hero__bottle-img { max-width: 200px; }
   .section { padding: 40px 0; }
   .section__header { margin-bottom: 32px; }
   .brand-strip { padding: 48px 0; }
@@ -355,4 +495,8 @@
   .cta-banner__actions { flex-direction: column; align-items: stretch; gap: 12px; }
   .cta-banner__actions .btn { width: 100%; justify-content: center; }
   .trust-bar { padding: 20px 0; }
+}
+
+@media (max-width: 360px) {
+  .products-grid { grid-template-columns: 1fr; }
 }

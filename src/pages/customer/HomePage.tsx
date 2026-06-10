@@ -1,170 +1,159 @@
 import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import * as THREE from 'three';
 import { ArrowRight, Award, Truck, Shield, Star } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import ProductCard from '../../components/ui/ProductCard';
 import './HomePage.css';
 
+const BOTTLE_IMG = 'https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=800&q=80';
+
+const textContainer = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.13 } },
+};
+
+const textChild = {
+  hidden: { opacity: 0, x: -28 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.75, ease: [0.4, 0, 0.2, 1] } },
+};
+
 const HomePage: React.FC = () => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const products = useStore((s) => s.products);
   const storeSettings = useStore((s) => s.storeSettings);
   const featured = products.filter((p) => p.featured);
   const bestsellers = products.filter((p) => p.bestseller);
 
+  // Tilt refs
+  const heroRef = useRef<HTMLElement>(null);
+  const bottleCardRef = useRef<HTMLDivElement>(null);
+  const targetRef = useRef({ x: 0, y: 0 });
+  const currentRef = useRef({ x: 0, y: 0 });
+  const rafRef = useRef<number>(0);
+
+  // Continuous lerp RAF loop
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
-
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(45, canvas.offsetWidth / canvas.offsetHeight, 0.1, 100);
-    camera.position.set(0, 0, 5);
-
-    // Floating golden particles
-    const particleCount = 120;
-    const geometry = new THREE.BufferGeometry();
-    const positions = new Float32Array(particleCount * 3);
-    const sizes = new Float32Array(particleCount);
-
-    for (let i = 0; i < particleCount; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 12;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 8;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 6;
-      sizes[i] = Math.random() * 0.04 + 0.01;
-    }
-
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
-
-    const particleMaterial = new THREE.PointsMaterial({
-      color: 0xC9A84C,
-      size: 0.04,
-      transparent: true,
-      opacity: 0.7,
-      sizeAttenuation: true,
-    });
-
-    const particles = new THREE.Points(geometry, particleMaterial);
-    scene.add(particles);
-
-    // Central orb - glowing sphere representing a perfume bottle
-    const orbGeo = new THREE.SphereGeometry(0.8, 64, 64);
-    const orbMat = new THREE.MeshPhongMaterial({
-      color: 0x1A1814,
-      specular: 0xC9A84C,
-      shininess: 120,
-      transparent: true,
-      opacity: 0.85,
-    });
-    const orb = new THREE.Mesh(orbGeo, orbMat);
-    scene.add(orb);
-
-    // Ring around the orb
-    const ringGeo = new THREE.TorusGeometry(1.3, 0.012, 16, 100);
-    const ringMat = new THREE.MeshPhongMaterial({ color: 0xC9A84C, emissive: 0x8B6914, emissiveIntensity: 0.3 });
-    const ring = new THREE.Mesh(ringGeo, ringMat);
-    ring.rotation.x = Math.PI / 2.5;
-    scene.add(ring);
-
-    // Outer ring
-    const ring2Geo = new THREE.TorusGeometry(1.7, 0.006, 16, 100);
-    const ring2Mat = new THREE.MeshPhongMaterial({ color: 0xC9A84C, transparent: true, opacity: 0.4 });
-    const ring2 = new THREE.Mesh(ring2Geo, ring2Mat);
-    ring2.rotation.x = Math.PI / 3;
-    ring2.rotation.y = Math.PI / 6;
-    scene.add(ring2);
-
-    // Lights
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
-    scene.add(ambientLight);
-
-    const goldLight = new THREE.PointLight(0xC9A84C, 2, 8);
-    goldLight.position.set(2, 2, 3);
-    scene.add(goldLight);
-
-    const warmLight = new THREE.PointLight(0xE8D5A3, 1.5, 10);
-    warmLight.position.set(-2, -1, 2);
-    scene.add(warmLight);
-
-    let frame = 0;
-    const animate = () => {
-      frame++;
-      const t = frame * 0.008;
-
-      orb.rotation.y = t * 0.4;
-      ring.rotation.z = t * 0.25;
-      ring2.rotation.z = -t * 0.15;
-      ring2.rotation.y = t * 0.1;
-
-      particles.rotation.y = t * 0.03;
-      particles.rotation.x = t * 0.01;
-
-      goldLight.position.x = Math.sin(t * 0.5) * 3;
-      goldLight.position.y = Math.cos(t * 0.3) * 2;
-
-      orb.position.y = Math.sin(t * 0.4) * 0.08;
-
-      renderer.render(scene, camera);
-      return requestAnimationFrame(animate);
+    const tick = () => {
+      currentRef.current.x += (targetRef.current.x - currentRef.current.x) * 0.08;
+      currentRef.current.y += (targetRef.current.y - currentRef.current.y) * 0.08;
+      if (bottleCardRef.current) {
+        bottleCardRef.current.style.transform =
+          `rotateY(${currentRef.current.x}deg) rotateX(${currentRef.current.y}deg)`;
+      }
+      rafRef.current = requestAnimationFrame(tick);
     };
-
-    const raf = animate();
-
-    const handleResize = () => {
-      if (!canvas) return;
-      const w = canvas.offsetWidth;
-      const h = canvas.offsetHeight;
-      renderer.setSize(w, h);
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
-    };
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener('resize', handleResize);
-      renderer.dispose();
-    };
+    rafRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafRef.current);
   }, []);
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!heroRef.current) return;
+    const r = heroRef.current.getBoundingClientRect();
+    targetRef.current.x = ((e.clientX - r.left) / r.width - 0.5) * 24;
+    targetRef.current.y = -((e.clientY - r.top) / r.height - 0.5) * 24;
+  };
+
+  const handleMouseLeave = () => { targetRef.current.x = 0; targetRef.current.y = 0; };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!heroRef.current) return;
+    const t = e.touches[0];
+    const r = heroRef.current.getBoundingClientRect();
+    targetRef.current.x = ((t.clientX - r.left) / r.width - 0.5) * 16;
+    targetRef.current.y = -((t.clientY - r.top) / r.height - 0.5) * 16;
+  };
+
+  // Split title: first two words plain, rest italic gold
+  const titleWords = storeSettings.heroTitle.split(' ');
+  const titleLine1 = titleWords.slice(0, 2).join(' ');
+  const titleLine2 = titleWords.slice(2).join(' ');
 
   return (
     <div className="home">
-      {/* Hero */}
-      <section className="hero">
-        <canvas ref={canvasRef} className="hero__canvas" />
-        <div className="hero__overlay" />
-        <div className="hero__content container">
+
+      {/* ── Hero ────────────────────────────────────────────────────── */}
+      <section
+        className="hero"
+        ref={heroRef}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleMouseLeave}
+      >
+        <div className="hero__inner container">
+
+          {/* Left — text */}
           <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, ease: [0.4, 0, 0.2, 1] }}
+            className="hero__left"
+            variants={textContainer}
+            initial="hidden"
+            animate="visible"
           >
-            <p className="hero__eyebrow">{storeSettings.heroEyebrow}</p>
-            <h1 className="hero__title">{storeSettings.heroTitle}</h1>
-            <p className="hero__subtitle">{storeSettings.heroSubtitle}</p>
-            <div className="hero__actions">
+            <motion.p variants={textChild} className="hero__eyebrow">
+              {storeSettings.heroEyebrow}
+            </motion.p>
+
+            <motion.h1 variants={textChild} className="hero__title">
+              {titleLine1}
+              {titleLine2 && (
+                <>
+                  <br />
+                  <em>{titleLine2}</em>
+                </>
+              )}
+            </motion.h1>
+
+            <motion.p variants={textChild} className="hero__subtitle">
+              {storeSettings.heroSubtitle}
+            </motion.p>
+
+            <motion.div variants={textChild} className="hero__actions">
               <Link to="/shop" className="btn btn--gold">
-                Explore Collection <ArrowRight size={16} />
+                Explore Collection <ArrowRight size={15} />
               </Link>
-              <Link to="/contact" className="btn btn--outline-light">
-                Inquire Now
+              <Link to="/about" className="btn btn--outline-light">
+                Our Story
               </Link>
+            </motion.div>
+          </motion.div>
+
+          {/* Right — bottle */}
+          <motion.div
+            className="hero__right"
+            initial={{ opacity: 0, x: 48, scale: 0.94 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            transition={{ duration: 1.1, ease: [0.4, 0, 0.2, 1], delay: 0.25 }}
+          >
+            <div className="hero__glow" />
+
+            <div className="hero__particles" aria-hidden>
+              {[1, 2, 3, 4, 5, 6].map((n) => (
+                <div key={n} className={`hero__particle hero__particle--${n}`} />
+              ))}
+            </div>
+
+            <div className="hero__bottle-scene">
+              <div className="hero__bottle-card" ref={bottleCardRef}>
+                <img
+                  src={BOTTLE_IMG}
+                  alt="Arabic oud perfume bottle"
+                  className="hero__bottle-img"
+                  draggable={false}
+                />
+              </div>
+              <div className="hero__bottle-shadow" />
             </div>
           </motion.div>
+
         </div>
-        <div className="hero__scroll-hint">
+
+        <div className="hero__scroll-hint" aria-hidden>
           <div className="hero__scroll-line" />
           <span>Scroll</span>
         </div>
       </section>
 
-      {/* Trust bar */}
+      {/* ── Trust bar ───────────────────────────────────────────────── */}
       <section className="trust-bar">
         <div className="container trust-bar__inner">
           {[
@@ -184,7 +173,7 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Featured */}
+      {/* ── Featured ────────────────────────────────────────────────── */}
       <section className="section container">
         <div className="section__header">
           <p className="section__eyebrow">Curated Selection</p>
@@ -210,7 +199,7 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Brand story strip */}
+      {/* ── Brand strip ─────────────────────────────────────────────── */}
       <section className="brand-strip">
         <div className="brand-strip__inner container">
           <div className="brand-strip__text">
@@ -244,7 +233,7 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Bestsellers */}
+      {/* ── Bestsellers ─────────────────────────────────────────────── */}
       {bestsellers.length > 0 && (
         <section className="section container">
           <div className="section__header">
@@ -267,7 +256,7 @@ const HomePage: React.FC = () => {
         </section>
       )}
 
-      {/* CTA banner */}
+      {/* ── CTA banner ──────────────────────────────────────────────── */}
       <section className="cta-banner container">
         <div className="cta-banner__inner">
           <h2 className="cta-banner__title">Questions? We're on WhatsApp.</h2>
@@ -282,6 +271,7 @@ const HomePage: React.FC = () => {
           </div>
         </div>
       </section>
+
     </div>
   );
 };
