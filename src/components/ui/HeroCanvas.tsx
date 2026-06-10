@@ -91,7 +91,7 @@ const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
 
     const isMobile = window.innerWidth < 768;
     const PARTICLE_COUNT  = isMobile ? 40 : 80;
-    const bottleBaseY     = isMobile ?  0.1 : -0.1;
+    const bottleBaseY     = isMobile ? -0.2 : -0.1;
     const bottleBaseX     = isMobile ?  0.0 : -0.3;
 
     // ── Scene / camera / renderer ─────────────────────────────────────────────
