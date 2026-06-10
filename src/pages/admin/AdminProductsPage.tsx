@@ -1,14 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Plus, Edit2, Trash2, X, Check } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import { Product, ProductCategory } from '../../types';
 import { formatPrice, generateId } from '../../utils/helpers';
+import { uploadImage, validateImageFile } from '../../lib/cloudinary';
 import toast from 'react-hot-toast';
 import './AdminProductsPage.css';
 
+type UploadSlot = { id: string; file: File; progress: number };
+
 const EMPTY_PRODUCT: Omit<Product, 'id' | 'createdAt'> = {
   name: '', brand: '', price: 0, description: '', longDescription: '',
-  category: 'oud', size: ['50ml', '100ml'], images: [''],
+  category: 'oud', size: ['50ml', '100ml'], images: [],
   topNotes: [], heartNotes: [], baseNotes: [],
   inStock: true, featured: false, bestseller: false,
   stockQuantity: 50,
@@ -22,9 +25,24 @@ const AdminProductsPage: React.FC = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<Omit<Product, 'id' | 'createdAt'>>(EMPTY_PRODUCT);
 
+  // Image upload state
+  const [uploading, setUploading] = useState<UploadSlot[]>([]);
+  const [showUrlInput, setShowUrlInput] = useState(false);
+  const [manualUrl, setManualUrl] = useState('');
+  const [dragging, setDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const resetImageState = () => {
+    setUploading([]);
+    setShowUrlInput(false);
+    setManualUrl('');
+    setDragging(false);
+  };
+
   const openAdd = () => {
-    setForm(EMPTY_PRODUCT);
+    setForm({ ...EMPTY_PRODUCT, images: [] });
     setEditingId(null);
+    resetImageState();
     setModalOpen(true);
   };
 
@@ -32,8 +50,69 @@ const AdminProductsPage: React.FC = () => {
     const { id, createdAt, ...rest } = p;
     setForm(rest);
     setEditingId(id);
+    resetImageState();
     setModalOpen(true);
   };
+
+  const closeModal = () => {
+    setModalOpen(false);
+    resetImageState();
+  };
+
+  // ── Image upload handlers ─────────────────────────────────────────────────
+
+  const handleFiles = (files: FileList | File[]) => {
+    const arr = Array.from(files);
+    const currentCount = form.images.filter(Boolean).length + uploading.length;
+    const slots = Math.max(0, 5 - currentCount);
+
+    arr.slice(0, slots).forEach((file) => {
+      const err = validateImageFile(file);
+      if (err) { toast.error(err); return; }
+
+      const tempId = generateId();
+      setUploading((prev) => [...prev, { id: tempId, file, progress: 0 }]);
+
+      uploadImage(file, (pct) => {
+        setUploading((prev) =>
+          prev.map((u) => u.id === tempId ? { ...u, progress: pct } : u)
+        );
+      })
+        .then((url) => {
+          setForm((f) => ({ ...f, images: [...f.images.filter(Boolean), url] }));
+          setUploading((prev) => prev.filter((u) => u.id !== tempId));
+        })
+        .catch(() => {
+          toast.error(`Failed to upload ${file.name}`);
+          setUploading((prev) => prev.filter((u) => u.id !== tempId));
+        });
+    });
+
+    if (arr.length > slots) {
+      toast.error(`Max 5 images per product. ${arr.length - slots} file(s) skipped.`);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragging(false);
+    if (e.dataTransfer.files.length > 0) handleFiles(e.dataTransfer.files);
+  };
+
+  const removeImage = (index: number) => {
+    setForm((f) => ({ ...f, images: f.images.filter((_, i) => i !== index) }));
+  };
+
+  const addManualUrl = () => {
+    const url = manualUrl.trim();
+    if (!url) return;
+    const count = form.images.filter(Boolean).length + uploading.length;
+    if (count >= 5) { toast.error('Max 5 images per product'); return; }
+    setForm((f) => ({ ...f, images: [...f.images.filter(Boolean), url] }));
+    setManualUrl('');
+  };
+
+  // ── Form handlers ─────────────────────────────────────────────────────────
 
   const handleDelete = (id: string, name: string) => {
     if (window.confirm(`Delete "${name}"? This cannot be undone.`)) {
@@ -47,6 +126,14 @@ const AdminProductsPage: React.FC = () => {
       toast.error('Name, brand, and price are required');
       return;
     }
+    if (form.images.filter(Boolean).length === 0) {
+      toast.error('At least one product image is required');
+      return;
+    }
+    if (uploading.length > 0) {
+      toast.error('Please wait for images to finish uploading');
+      return;
+    }
     if (editingId) {
       updateProduct(editingId, form);
       toast.success('Product updated');
@@ -54,7 +141,7 @@ const AdminProductsPage: React.FC = () => {
       addProduct({ ...form, id: generateId(), createdAt: new Date().toISOString() });
       toast.success('Product added');
     }
-    setModalOpen(false);
+    closeModal();
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -63,9 +150,11 @@ const AdminProductsPage: React.FC = () => {
     setForm((f) => ({ ...f, [name]: type === 'checkbox' ? checked : type === 'number' ? Number(value) : value }));
   };
 
-  const handleArrayField = (field: 'size' | 'topNotes' | 'heartNotes' | 'baseNotes' | 'images', value: string) => {
+  const handleArrayField = (field: 'size' | 'topNotes' | 'heartNotes' | 'baseNotes', value: string) => {
     setForm((f) => ({ ...f, [field]: value.split(',').map((v) => v.trim()).filter(Boolean) }));
   };
+
+  const imageCount = form.images.filter(Boolean).length + uploading.length;
 
   return (
     <div className="admin-products">
@@ -99,16 +188,16 @@ const AdminProductsPage: React.FC = () => {
                 <tr key={p.id}>
                   <td>
                     <div className="product-row">
-                      <img src={p.images[0]} alt={p.name} className="product-row__img" />
+                      {p.images[0] && (
+                        <img src={p.images[0]} alt={p.name} className="product-row__img" />
+                      )}
                       <div>
                         <p className="admin-table__name">{p.name}</p>
                         <p className="admin-table__sub">{p.brand}</p>
                       </div>
                     </div>
                   </td>
-                  <td>
-                    <span className="admin-cat-badge">{p.category}</span>
-                  </td>
+                  <td><span className="admin-cat-badge">{p.category}</span></td>
                   <td className="admin-table__bold">{formatPrice(p.price)}</td>
                   <td className="admin-table__muted">{p.size.join(', ')}</td>
                   <td>
@@ -149,14 +238,16 @@ const AdminProductsPage: React.FC = () => {
 
       {/* Modal */}
       {modalOpen && (
-        <div className="admin-modal-overlay" onClick={(e) => e.target === e.currentTarget && setModalOpen(false)}>
+        <div className="admin-modal-overlay" onClick={(e) => e.target === e.currentTarget && closeModal()}>
           <div className="admin-modal">
             <div className="admin-modal__header">
               <h2 className="admin-modal__title">{editingId ? 'Edit Product' : 'Add New Product'}</h2>
-              <button className="admin-modal__close" onClick={() => setModalOpen(false)}><X size={20} /></button>
+              <button className="admin-modal__close" onClick={closeModal}><X size={20} /></button>
             </div>
             <div className="admin-modal__body">
               <div className="admin-form-grid">
+
+                {/* Basic info */}
                 <div className="form-field">
                   <label>Product Name *</label>
                   <input name="name" value={form.name} onChange={handleChange} placeholder="Oud Al Shams" />
@@ -195,10 +286,81 @@ const AdminProductsPage: React.FC = () => {
                   <label>Full Description</label>
                   <textarea name="longDescription" value={form.longDescription} onChange={handleChange} rows={3} placeholder="Detailed product description..." />
                 </div>
+
+                {/* Image upload section */}
                 <div className="form-field admin-form-grid__full">
-                  <label>Image URLs (comma-separated)</label>
-                  <input value={form.images.join(', ')} onChange={(e) => handleArrayField('images', e.target.value)} placeholder="https://images.unsplash.com/..." />
+                  <label>Product Images * {imageCount > 0 && <span className="image-count-hint">({imageCount}/5)</span>}</label>
+
+                  {/* Thumbnails row */}
+                  {imageCount > 0 && (
+                    <div className="image-thumbs">
+                      {form.images.filter(Boolean).map((url, i) => (
+                        <div key={url + i} className="image-thumb">
+                          <img src={url} alt="" />
+                          <button
+                            type="button"
+                            className="image-thumb__remove"
+                            onClick={() => removeImage(i)}
+                          >×</button>
+                        </div>
+                      ))}
+                      {uploading.map((u) => (
+                        <div key={u.id} className="image-thumb image-thumb--loading">
+                          <div className="image-thumb__spinner" />
+                          <div className="image-thumb__progress">
+                            <div className="image-thumb__progress-bar" style={{ width: `${u.progress}%` }} />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Drop zone (hidden when at 5 images) */}
+                  {imageCount < 5 && (
+                    <div
+                      className={`image-upload-zone${dragging ? ' dragging' : ''}`}
+                      onClick={() => fileInputRef.current?.click()}
+                      onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+                      onDragLeave={() => setDragging(false)}
+                      onDrop={handleDrop}
+                    >
+                      <div className="image-upload-zone__icon">📷</div>
+                      <p className="image-upload-zone__text">Click to upload or drag images here</p>
+                      <p className="image-upload-zone__sub">JPG, PNG, WebP — max 5MB each — up to 5 images</p>
+                    </div>
+                  )}
+
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    multiple
+                    style={{ display: 'none' }}
+                    onChange={(e) => { if (e.target.files) handleFiles(e.target.files); e.target.value = ''; }}
+                  />
+
+                  {/* Manual URL toggle */}
+                  <button type="button" className="image-url-toggle" onClick={() => setShowUrlInput((v) => !v)}>
+                    {showUrlInput ? 'Hide URL input' : 'Or add image URL manually'}
+                  </button>
+
+                  {showUrlInput && (
+                    <div className="image-url-input-row">
+                      <input
+                        type="text"
+                        value={manualUrl}
+                        onChange={(e) => setManualUrl(e.target.value)}
+                        placeholder="https://images.unsplash.com/..."
+                        onKeyDown={(e) => e.key === 'Enter' && addManualUrl()}
+                      />
+                      <button type="button" className="image-url-add-btn" onClick={addManualUrl}>
+                        Add
+                      </button>
+                    </div>
+                  )}
                 </div>
+
+                {/* Fragrance notes */}
                 <div className="form-field">
                   <label>Top Notes (comma-separated)</label>
                   <input value={form.topNotes.join(', ')} onChange={(e) => handleArrayField('topNotes', e.target.value)} placeholder="Bergamot, Black Pepper" />
@@ -211,6 +373,8 @@ const AdminProductsPage: React.FC = () => {
                   <label>Base Notes (comma-separated)</label>
                   <input value={form.baseNotes.join(', ')} onChange={(e) => handleArrayField('baseNotes', e.target.value)} placeholder="Sandalwood, Musk" />
                 </div>
+
+                {/* Flags */}
                 <div className="admin-checkboxes">
                   {[
                     { name: 'inStock', label: 'In Stock' },
@@ -228,13 +392,14 @@ const AdminProductsPage: React.FC = () => {
                     </label>
                   ))}
                 </div>
+
               </div>
             </div>
             <div className="admin-modal__footer">
               <button className="btn btn--gold admin-save-btn" onClick={handleSave}>
                 <Check size={15} /> {editingId ? 'Save Changes' : 'Add Product'}
               </button>
-              <button className="admin-cancel-btn" onClick={() => setModalOpen(false)}>Cancel</button>
+              <button className="admin-cancel-btn" onClick={closeModal}>Cancel</button>
             </div>
           </div>
         </div>
