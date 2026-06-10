@@ -351,3 +351,27 @@
   .form-grid { grid-template-columns: 1fr; }
   .form-field--full { grid-column: 1; }
 }
+
+@media (max-width: 480px) {
+  .checkout { padding-top: calc(var(--nav-height) + 24px); padding-bottom: 48px; }
+  .checkout__title { font-size: 28px; margin-bottom: 24px; }
+  .checkout__section { padding: 20px 16px; }
+  .form-field input,
+  .form-field select,
+  .form-field textarea { font-size: 16px; min-height: 44px; }
+  .checkout__submit { min-height: 48px; font-size: 14px; }
+  .checkout-success { padding: 24px 16px; }
+  .checkout-success__title { font-size: 36px; }
+  .checkout-success__continue { width: 100%; justify-content: center; }
+}
+
+.btn--outline-dark {
+  background: transparent;
+  color: var(--charcoal);
+  border: 1px solid var(--charcoal);
+}
+.btn--outline-dark:hover {
+  background: var(--charcoal);
+  color: var(--white);
+  transform: translateY(-2px);
+}

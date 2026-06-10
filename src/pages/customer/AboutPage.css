@@ -158,7 +158,24 @@
 }
 
 @media (max-width: 768px) {
+  .about__hero { padding: 64px 0 52px; min-height: 360px; }
   .about__story-grid { grid-template-columns: 1fr; gap: 40px; }
   .about__values-grid { grid-template-columns: 1fr; }
   .about__cta-inner { padding: 40px 24px; }
+  .about__story { padding-top: 56px; padding-bottom: 56px; }
+  .about__values { padding: 56px 0; }
+  .about__cta { padding: 56px 0; }
+}
+
+@media (max-width: 480px) {
+  .about__hero { padding: 48px 0 40px; min-height: 280px; }
+  .about__hero-title { font-size: clamp(32px, 10vw, 48px); }
+  .about__story { padding-top: 40px; padding-bottom: 40px; }
+  .about__values { padding: 40px 0; }
+  .about__cta { padding: 40px 0; }
+  .about__cta-inner { padding: 32px 16px; }
+  .about__cta-actions { flex-direction: column; align-items: stretch; }
+  .about__cta-actions .btn { width: 100%; justify-content: center; }
+  .about__values-grid { grid-template-columns: 1fr; gap: 16px; }
+  .about__values-header { margin-bottom: 28px; }
 }

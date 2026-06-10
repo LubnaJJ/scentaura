@@ -45,3 +45,7 @@ img { max-width: 100%; }
   .container { padding: 0 20px; }
   :root { --nav-height: 64px; }
 }
+
+@media (max-width: 480px) {
+  .container { padding: 0 16px; }
+}

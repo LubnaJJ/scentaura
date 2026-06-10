@@ -167,6 +167,7 @@
   letter-spacing: 1.5px;
   text-transform: uppercase;
   padding: 9px 16px;
+  min-height: 44px;
   border: 1px solid var(--cream-dark);
   border-radius: 2px;
   background: var(--white);
@@ -260,7 +261,20 @@
   .shop__grid { grid-template-columns: repeat(2, 1fr); }
 }
 
+@media (max-width: 768px) {
+  .shop__hero { padding: 80px 0 64px; min-height: 300px; }
+  .shop__body { padding-top: 32px; padding-bottom: 56px; }
+}
+
 @media (max-width: 640px) {
   .shop__grid { grid-template-columns: 1fr; }
   .shop__filters { flex-direction: column; align-items: stretch; }
+  .shop__search-input { min-height: 44px; font-size: 16px; }
+  .shop__sort-select { min-height: 44px; font-size: 16px; }
+}
+
+@media (max-width: 480px) {
+  .shop__hero { padding: 56px 0 48px; min-height: 260px; }
+  .shop__title { font-size: clamp(32px, 9vw, 44px); }
+  .shop__subtitle { font-size: 13px; }
 }

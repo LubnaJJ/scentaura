@@ -14,6 +14,7 @@
   inset: 0;
   width: 100%;
   height: 100%;
+  max-width: 100%;
 }
 
 .hero__overlay {
@@ -142,6 +143,17 @@
 .btn--outline-light:hover {
   border-color: var(--gold);
   color: var(--gold);
+}
+
+.btn--outline-dark {
+  background: transparent;
+  color: var(--charcoal);
+  border: 1px solid var(--charcoal);
+}
+.btn--outline-dark:hover {
+  background: var(--charcoal);
+  color: var(--white);
+  transform: translateY(-2px);
 }
 
 /* Trust bar */
@@ -316,9 +328,27 @@
 }
 
 @media (max-width: 768px) {
+  .hero { min-height: 600px; }
   .products-grid { grid-template-columns: 1fr; }
   .trust-bar__inner { grid-template-columns: 1fr; }
   .brand-strip__inner { grid-template-columns: 1fr; gap: 40px; }
   .brand-strip__visual { border-left: none; padding-left: 0; border-top: 1px solid rgba(201,168,76,0.25); padding-top: 40px; flex-direction: row; flex-wrap: wrap; }
   .cta-banner__inner { padding: 40px 24px; }
+  .section { padding: 56px 0; }
+}
+
+@media (max-width: 480px) {
+  .hero { min-height: 520px; height: 100svh; }
+  .hero__title { font-size: clamp(36px, 10vw, 52px); }
+  .hero__subtitle { font-size: 14px; margin-bottom: 28px; }
+  .hero__actions { flex-direction: column; gap: 12px; }
+  .hero__actions .btn { width: 100%; justify-content: center; }
+  .section { padding: 40px 0; }
+  .section__header { margin-bottom: 32px; }
+  .brand-strip { padding: 48px 0; }
+  .brand-strip__visual { flex-direction: column; gap: 24px; }
+  .cta-banner__inner { padding: 32px 16px; }
+  .cta-banner__actions { flex-direction: column; align-items: stretch; gap: 12px; }
+  .cta-banner__actions .btn { width: 100%; justify-content: center; }
+  .trust-bar { padding: 20px 0; }
 }
