@@ -3,13 +3,13 @@ import { getFirestore } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 
 const firebaseConfig = {
-  apiKey: 'AIzaSyD5X4xbkEdOq_1NZZNN-yPg9CzEcUNa-ws',
-  authDomain: 'fluttercourse-d8455.firebaseapp.com',
-  projectId: 'fluttercourse-d8455',
-  storageBucket: 'fluttercourse-d8455.firebasestorage.app',
-  messagingSenderId: '777971907355',
-  appId: '1:777971907355:web:b3c06e7ad75ae83c5b31be',
-  measurementId: 'G-73K5GJED4B',
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_FIREBASE_APP_ID,
+  measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID,
 };
 
 const app = initializeApp(firebaseConfig);
