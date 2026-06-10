@@ -329,12 +329,16 @@
 
 @media (max-width: 768px) {
   .hero { min-height: 600px; }
-  .products-grid { grid-template-columns: 1fr; }
+  .products-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
   .trust-bar__inner { grid-template-columns: 1fr; }
   .brand-strip__inner { grid-template-columns: 1fr; gap: 40px; }
   .brand-strip__visual { border-left: none; padding-left: 0; border-top: 1px solid rgba(201,168,76,0.25); padding-top: 40px; flex-direction: row; flex-wrap: wrap; }
   .cta-banner__inner { padding: 40px 24px; }
   .section { padding: 56px 0; }
+}
+
+@media (max-width: 360px) {
+  .products-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 480px) {

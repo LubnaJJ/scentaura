@@ -169,3 +169,11 @@
   padding: 4px 8px;
   border-radius: 2px;
 }
+
+@media (max-width: 768px) {
+  .product-card__info { padding: 10px 12px 12px; }
+  .product-card__brand { font-size: 9px; }
+  .product-card__name { font-size: 14px; }
+  .product-card__desc { display: none; }
+  .product-card__price-main { font-size: 13px; }
+}

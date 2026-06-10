@@ -267,10 +267,14 @@
 }
 
 @media (max-width: 640px) {
-  .shop__grid { grid-template-columns: 1fr; }
+  .shop__grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
   .shop__filters { flex-direction: column; align-items: stretch; }
   .shop__search-input { min-height: 44px; font-size: 16px; }
   .shop__sort-select { min-height: 44px; font-size: 16px; }
+}
+
+@media (max-width: 360px) {
+  .shop__grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 480px) {
