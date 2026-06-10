@@ -1,18 +1,17 @@
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 
-// 4-pointed luxury sparkle star (diamond cross — 4 sharp outer, 4 tiny inner)
 function makeSharpStar4(size: number): THREE.ExtrudeGeometry {
   const s = size;
-  const i = size * 0.08; // very tight inner radius → razor-sharp points
+  const i = size * 0.08;
   const shape = new THREE.Shape();
-  shape.moveTo(0,  s);    // top
+  shape.moveTo( 0,  s);
   shape.lineTo( i,  i);
-  shape.lineTo( s,  0);   // right
+  shape.lineTo( s,  0);
   shape.lineTo( i, -i);
-  shape.lineTo( 0, -s);   // bottom
+  shape.lineTo( 0, -s);
   shape.lineTo(-i, -i);
-  shape.lineTo(-s,  0);   // left
+  shape.lineTo(-s,  0);
   shape.lineTo(-i,  i);
   shape.closePath();
   return new THREE.ExtrudeGeometry(shape, { depth: 0.02, bevelEnabled: false });
@@ -26,11 +25,10 @@ const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
     if (!el) return;
 
     const isMobile = window.innerWidth <= 768;
-    const PARTICLE_COUNT = isMobile ? 80 : 150;
+    const PARTICLE_COUNT = isMobile ? 40 : 80;
 
     // ── Scene / camera / renderer ─────────────────────────────────────────────
-    const scene = new THREE.Scene();
-
+    const scene  = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(45, el.clientWidth / el.clientHeight, 0.1, 100);
     camera.position.z = 5;
 
@@ -44,40 +42,52 @@ const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
     // ── Lights ───────────────────────────────────────────────────────────────
     scene.add(new THREE.AmbientLight(0xffffff, 0.3));
 
+    // Warm fill from top-right
     const pl1 = new THREE.PointLight(0xC9A84C, 3, 20);
     pl1.position.set(3, 3, 3);
     scene.add(pl1);
 
+    // Soft warm fill from bottom-left
     const pl2 = new THREE.PointLight(0xE8D5A3, 1.5, 20);
     pl2.position.set(-3, -2, 2);
     scene.add(pl2);
 
+    // Uplight from below
     const pl3 = new THREE.PointLight(0xC9A84C, 2, 15);
     pl3.position.set(0, -3, 2);
     scene.add(pl3);
 
+    // Front key light — white, illuminates bottle clearly
+    const frontLight = new THREE.PointLight(0xffffff, 1.5, 12);
+    frontLight.position.set(0, 0, 4);
+    scene.add(frontLight);
+
+    // Gold rim light — left side edge glow
+    const rimLight = new THREE.PointLight(0xC9A84C, 1.0, 10);
+    rimLight.position.set(-3, 1, 2);
+    scene.add(rimLight);
+
     // ── Perfume bottle ────────────────────────────────────────────────────────
-    //
-    //  Parts stack from bottom to top (group centered at y=0):
-    //    body    : y -1.145 → +0.455  (center -0.345)
-    //    neck    : y +0.455 → +0.805  (center  0.630)
-    //    capRing : y +0.805 → +0.865  (center  0.835)
-    //    cap     : y +0.865 → +1.145  (center  1.005)
-    //
+    //  body    : y -1.145 → +0.455  (center -0.345)
+    //  neck    : y +0.455 → +0.805  (center  0.630)
+    //  capRing : y +0.805 → +0.865  (center  0.835)
+    //  cap     : y +0.865 → +1.145  (center  1.005)
     const bottleGroup = new THREE.Group();
 
     const glassMat = new THREE.MeshStandardMaterial({
-      color: 0x1A1410,
+      color: 0x2A2018,
       emissive: new THREE.Color(0xC9A84C),
-      emissiveIntensity: 0.08,
-      metalness: 0.95,
-      roughness: 0.05,
+      emissiveIntensity: 0.3,
+      metalness: 0.7,
+      roughness: 0.2,
       transparent: true,
       opacity: 0.92,
     });
 
     const goldMat = new THREE.MeshStandardMaterial({
       color: 0xC9A84C,
+      emissive: new THREE.Color(0xC9A84C),
+      emissiveIntensity: 0.6,
       metalness: 1.0,
       roughness: 0.05,
     });
@@ -102,7 +112,6 @@ const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
     capMesh.position.y = 1.005;
     bottleGroup.add(capMesh);
 
-    // Subtle gold label on front face
     const labelGeo = new THREE.PlaneGeometry(0.7, 0.8);
     const labelMat = new THREE.MeshStandardMaterial({
       color: 0xC9A84C,
@@ -113,32 +122,31 @@ const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
     label.position.set(0, -0.345, 0.31);
     bottleGroup.add(label);
 
-    // Golden glow light — lives inside the group so it floats with the bottle
+    // Inner glow — breathes with the bottle
     const bottleGlow = new THREE.PointLight(0xC9A84C, 2.0, 8);
     bottleGlow.position.set(0, 0, 0);
     bottleGroup.add(bottleGlow);
 
     scene.add(bottleGroup);
 
-    // ── Shared star material (outer) ──────────────────────────────────────────
-    const outerStarMat = new THREE.MeshStandardMaterial({
+    // ── Star orbits ───────────────────────────────────────────────────────────
+    const starBaseMat = new THREE.MeshStandardMaterial({
       color: 0xC9A84C,
       emissive: new THREE.Color(0xC9A84C),
-      emissiveIntensity: 0.8,
+      emissiveIntensity: 1.2,
       metalness: 1.0,
       roughness: 0.0,
     });
 
-    // Outer orbit — 6 stars, radius 2.4, tilted 15°
-    const outerGeo   = makeSharpStar4(0.22);
-    const outerGroup = new THREE.Group();
+    // Outer orbit — 3 stars, radius 2.4, tilted 15°, speed 0.002
+    const outerGeo    = makeSharpStar4(0.18);
+    const outerGroup  = new THREE.Group();
     outerGroup.rotation.x = (15 * Math.PI) / 180;
     const outerStars: THREE.Mesh[] = [];
-    // Stagger Y heights so they're not coplanar
-    const outerYOff = [-0.12, 0.18, -0.08, 0.22, -0.15, 0.09];
-    for (let idx = 0; idx < 6; idx++) {
-      const a    = (idx / 6) * Math.PI * 2;
-      const mesh = new THREE.Mesh(outerGeo, outerStarMat);
+    const outerYOff   = [-0.10, 0.16, -0.06];
+    for (let idx = 0; idx < 3; idx++) {
+      const a    = (idx / 3) * Math.PI * 2;
+      const mesh = new THREE.Mesh(outerGeo, starBaseMat);
       mesh.position.set(Math.cos(a) * 2.4, outerYOff[idx], Math.sin(a) * 2.4);
       mesh.rotation.y = a;
       outerGroup.add(mesh);
@@ -146,20 +154,20 @@ const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
     }
     scene.add(outerGroup);
 
-    // Middle orbit — 4 stars, radius 1.7, tilted 25°, counter-rotates
-    const middleGeo = makeSharpStar4(0.14);
-    const middleMat = new THREE.MeshStandardMaterial({
+    // Middle orbit — 2 stars, radius 1.7, tilted 25°, counter-rotates, speed 0.0035
+    const middleGeo   = makeSharpStar4(0.12);
+    const middleMat   = new THREE.MeshStandardMaterial({
       color: 0xC9A84C,
       emissive: new THREE.Color(0xC9A84C),
-      emissiveIntensity: 1.0,
+      emissiveIntensity: 1.2,
       metalness: 1.0,
       roughness: 0.0,
     });
     const middleGroup = new THREE.Group();
     middleGroup.rotation.x = (25 * Math.PI) / 180;
     const middleStars: THREE.Mesh[] = [];
-    for (let idx = 0; idx < 4; idx++) {
-      const a    = (idx / 4) * Math.PI * 2;
+    for (let idx = 0; idx < 2; idx++) {
+      const a    = (idx / 2) * Math.PI * 2;
       const mesh = new THREE.Mesh(middleGeo, middleMat);
       mesh.position.set(Math.cos(a) * 1.7, 0, Math.sin(a) * 1.7);
       mesh.rotation.y = a;
@@ -168,37 +176,11 @@ const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
     }
     scene.add(middleGroup);
 
-    // Close orbit — 3 tiny stars, radius 1.1, random axis tilt
-    const closeGeo = makeSharpStar4(0.08);
-    const closeMat = new THREE.MeshStandardMaterial({
-      color: 0xC9A84C,
-      emissive: new THREE.Color(0xC9A84C),
-      emissiveIntensity: 1.4,
-      metalness: 1.0,
-      roughness: 0.0,
-    });
-    const closeGroup = new THREE.Group();
-    closeGroup.rotation.x = 0.55;
-    closeGroup.rotation.z = 0.28;
-    const closeStars: THREE.Mesh[] = [];
-    for (let idx = 0; idx < 3; idx++) {
-      const a    = (idx / 3) * Math.PI * 2;
-      const mesh = new THREE.Mesh(closeGeo, closeMat);
-      mesh.position.set(Math.cos(a) * 1.1, 0, Math.sin(a) * 1.1);
-      mesh.rotation.x = (idx - 1) * 0.4;
-      closeGroup.add(mesh);
-      closeStars.push(mesh);
-    }
-    scene.add(closeGroup);
-
     // ── Particles ─────────────────────────────────────────────────────────────
     const posArr = new Float32Array(PARTICLE_COUNT * 3);
     const pData: {
-      angle: number;
-      radius: number;
-      speed: number;
-      orbitSpeed: number;
-      drift: boolean;
+      angle: number; radius: number;
+      speed: number; orbitSpeed: number; drift: boolean;
     }[] = [];
 
     for (let i = 0; i < PARTICLE_COUNT; i++) {
@@ -218,12 +200,12 @@ const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
     }
 
     const particleGeo = new THREE.BufferGeometry();
-    const posAttr = new THREE.BufferAttribute(posArr, 3);
+    const posAttr     = new THREE.BufferAttribute(posArr, 3);
     posAttr.setUsage(THREE.DynamicDrawUsage);
     particleGeo.setAttribute('position', posAttr);
     const particleMat = new THREE.PointsMaterial({
       color: 0xE8D5A3,
-      size: 0.04,
+      size: 0.015,
       transparent: true,
       opacity: 0.7,
       sizeAttenuation: true,
@@ -231,7 +213,7 @@ const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
     const particles = new THREE.Points(particleGeo, particleMat);
     scene.add(particles);
 
-    // ── Arabic geometric background patterns ──────────────────────────────────
+    // ── Arabic geometric background — very faint ──────────────────────────────
     const buildLineStar = (outerR: number, innerR: number, n: number): THREE.Vector3[] => {
       const pts: THREE.Vector3[] = [];
       for (let i = 0; i <= n * 2; i++) {
@@ -243,7 +225,7 @@ const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
     };
 
     const bgStarGeo  = new THREE.BufferGeometry().setFromPoints(buildLineStar(3.5, 1.5, 8));
-    const bgStarMat  = new THREE.LineBasicMaterial({ color: 0xC9A84C, transparent: true, opacity: 0.12 });
+    const bgStarMat  = new THREE.LineBasicMaterial({ color: 0xC9A84C, transparent: true, opacity: 0.06 });
     const bgStarLine = new THREE.Line(bgStarGeo, bgStarMat);
     bgStarLine.position.z = -0.5;
     scene.add(bgStarLine);
@@ -254,13 +236,13 @@ const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
       circPts.push(new THREE.Vector3(Math.cos(a) * 3.2, Math.sin(a) * 3.2, 0));
     }
     const circGeo  = new THREE.BufferGeometry().setFromPoints(circPts);
-    const circMat  = new THREE.LineBasicMaterial({ color: 0xC9A84C, transparent: true, opacity: 0.07 });
+    const circMat  = new THREE.LineBasicMaterial({ color: 0xC9A84C, transparent: true, opacity: 0.04 });
     const circLine = new THREE.Line(circGeo, circMat);
     circLine.position.z = -0.5;
     scene.add(circLine);
 
     const hexGeo  = new THREE.BufferGeometry().setFromPoints(buildLineStar(2.4, 1.2, 6));
-    const hexMat  = new THREE.LineBasicMaterial({ color: 0xE8D5A3, transparent: true, opacity: 0.06 });
+    const hexMat  = new THREE.LineBasicMaterial({ color: 0xE8D5A3, transparent: true, opacity: 0.03 });
     const hexLine = new THREE.Line(hexGeo, hexMat);
     hexLine.position.z = -0.3;
     scene.add(hexLine);
@@ -306,39 +288,32 @@ const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
       if (document.visibilityState === 'hidden') return;
 
       t += 0.01;
-
       lm.x += (mouse.x - lm.x) * 0.03;
       lm.y += (mouse.y - lm.y) * 0.03;
 
-      // Bottle: continuous Y rotation + float + lerp tilt toward mouse
+      // Bottle
       bottleGroup.rotation.y += 0.004;
       bottleGroup.position.y  = Math.sin(t * 0.6) * 0.08;
-      bottleGroup.rotation.x += (lm.y *  MAX_TILT - bottleGroup.rotation.x) * 0.04;
+      bottleGroup.rotation.x += ( lm.y * MAX_TILT - bottleGroup.rotation.x) * 0.04;
       bottleGroup.rotation.z += (-lm.x * MAX_TILT - bottleGroup.rotation.z) * 0.04;
-
-      // Glow breathing
       bottleGlow.intensity = 1.5 + Math.sin(t * 1.2) * 0.5;
 
       // Outer orbit
-      outerGroup.rotation.y += 0.004;
+      outerGroup.rotation.y += 0.002;
       outerGroup.rotation.x  = (15 * Math.PI / 180) + lm.y * 0.08;
       outerStars.forEach((s) => { s.rotation.z += 0.015; });
 
       // Middle orbit — counter-rotates
-      middleGroup.rotation.y -= 0.007;
+      middleGroup.rotation.y -= 0.0035;
       middleGroup.rotation.x  = (25 * Math.PI / 180) + lm.y * 0.06;
       middleStars.forEach((s) => { s.rotation.z += 0.015; });
-
-      // Close orbit
-      closeGroup.rotation.y += 0.012;
-      closeStars.forEach((s) => { s.rotation.z += 0.015; });
 
       // Arabic background
       bgStarLine.rotation.z += 0.0008;
       circLine.rotation.z   -= 0.0004;
       hexLine.rotation.z    += 0.0005;
 
-      // Camera breathing + mouse track
+      // Camera
       camera.position.y  = Math.sin(t * 0.3) * 0.05;
       camera.position.x += (lm.x * 0.1 - camera.position.x) * 0.02;
 
@@ -363,7 +338,6 @@ const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
         }
       }
       posAttr.needsUpdate = true;
-
       particles.rotation.y = lm.x * 0.05;
       particles.rotation.x = lm.y * 0.05;
 
@@ -379,13 +353,12 @@ const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
       el.removeEventListener('mousemove', onMouseMove);
       if (isMobile) window.removeEventListener('deviceorientation', onOrientation);
 
-      bodyGeo.dispose();    neckGeo.dispose();    capRingGeo.dispose();
-      capGeo.dispose();     labelGeo.dispose();
-      glassMat.dispose();   goldMat.dispose();    labelMat.dispose();
+      bodyGeo.dispose();   neckGeo.dispose();   capRingGeo.dispose();
+      capGeo.dispose();    labelGeo.dispose();
+      glassMat.dispose();  goldMat.dispose();   labelMat.dispose();
 
-      outerGeo.dispose();   outerStarMat.dispose();
-      middleGeo.dispose();  middleMat.dispose();
-      closeGeo.dispose();   closeMat.dispose();
+      outerGeo.dispose();  starBaseMat.dispose();
+      middleGeo.dispose(); middleMat.dispose();
 
       particleGeo.dispose(); particleMat.dispose();
       bgStarGeo.dispose();   bgStarMat.dispose();
