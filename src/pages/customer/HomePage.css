@@ -427,8 +427,11 @@
   /* Canvas on top, text below */
   .hero__right {
     order: 1;
-    height: 300px;
-    min-height: 300px;
+    height: 280px;
+    min-height: 280px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
   .hero__right::before {
     /* Replace left-edge fade with bottom fade on mobile */
@@ -445,11 +448,14 @@
     order: 2;
     text-align: center;
     align-items: center;
-    padding: 40px 24px 80px;
+    padding: 16px 24px 72px;
   }
   .hero__left::before { display: none; }
   .hero__eyebrow::before { display: none; }
-  .hero__subtitle { max-width: 100%; }
+  .hero__eyebrow { margin-top: 0; margin-bottom: 12px; }
+  .hero__title { margin-bottom: 12px; }
+  .hero__divider { margin-bottom: 12px; }
+  .hero__subtitle { max-width: 100%; margin-bottom: 24px; }
 
   .products-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
   .trust-bar__inner { grid-template-columns: 1fr; }

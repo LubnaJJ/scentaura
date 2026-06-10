@@ -89,9 +89,9 @@ const HeroCanvas: React.FC<{ className?: string }> = ({ className }) => {
     const el = mountRef.current;
     if (!el) return;
 
-    const isMobile = window.innerWidth <= 768;
+    const isMobile = window.innerWidth < 768;
     const PARTICLE_COUNT  = isMobile ? 40 : 80;
-    const bottleBaseY     = isMobile ? -0.4 : -0.1;
+    const bottleBaseY     = isMobile ? -0.2 : -0.1;
 
     // ── Scene / camera / renderer ─────────────────────────────────────────────
     const scene  = new THREE.Scene();
