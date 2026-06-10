@@ -29,7 +29,7 @@ const AdminLoginPage: React.FC = () => {
   return (
     <div className="admin-login">
       <div className="admin-login__card">
-        <div className="admin-login__logo">SCENTAURA</div>
+        <div className="admin-login__logo">ZACK'S PERFUME</div>
         <p className="admin-login__sub">Admin Portal</p>
         <div className="admin-login__icon-wrap">
           <Lock size={28} />
@@ -42,7 +42,7 @@ const AdminLoginPage: React.FC = () => {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@scentaura.lk"
+              placeholder="admin@zacksperfume.lk"
               autoComplete="email"
               required
             />

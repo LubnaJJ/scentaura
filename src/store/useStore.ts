@@ -3,26 +3,16 @@ import { CartItem, Product, Order, Inquiry, StoreSettings } from '../types';
 import * as fs from '../lib/firestore';
 import { adminLogin as fbLogin, adminLogout as fbLogout } from '../lib/auth';
 
-const SETTINGS_KEY = 'scentaura_settings';
-
 const DEFAULT_SETTINGS: StoreSettings = {
-  storeName: 'SCENTAURA',
+  storeName: "ZACK'S PERFUME",
   storeTagline: 'Arabian Fragrances',
   heroTitle: 'Wear the Soul of Arabia',
   heroSubtitle: 'Authentic Arabic fragrances, curated for the man who commands presence. Rare Ouds, sacred Ambers, and precious Musks — delivered to your door.',
   heroEyebrow: 'Arabian Perfumery · Sri Lanka',
   whatsappNumber: '94771770771',
-  contactEmail: 'hello@scentaura.lk',
+  contactEmail: 'hello@zacksperfume.lk',
   footerTagline: 'Curating the finest Arabic fragrances for the discerning man in Sri Lanka.',
 };
-
-function loadSettings(): StoreSettings {
-  try {
-    const raw = localStorage.getItem(SETTINGS_KEY);
-    if (raw) return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) };
-  } catch {}
-  return { ...DEFAULT_SETTINGS };
-}
 
 interface StoreState {
   // Data
@@ -77,7 +67,7 @@ export const useStore = create<StoreState>()((set, get) => ({
   cart: [],
   isAdminLoggedIn: false,
   authLoading: true,
-  storeSettings: loadSettings(),
+  storeSettings: { ...DEFAULT_SETTINGS },
 
   // ── Products ────────────────────────────────────────────────────────────
   addProduct: (product) => {
@@ -196,7 +186,7 @@ export const useStore = create<StoreState>()((set, get) => ({
   updateStoreSettings: (updates) => {
     set((s) => {
       const next = { ...s.storeSettings, ...updates };
-      try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(next)); } catch {}
+      fs.saveStoreSettings(next).catch(console.error);
       return { storeSettings: next };
     });
   },
@@ -215,13 +205,16 @@ export const useStore = create<StoreState>()((set, get) => ({
 
   // ── Init ────────────────────────────────────────────────────────────────
   initStore: async () => {
-    // Backfill stockQuantity on any legacy product docs before loading
     await fs.seedStockQuantity();
-    const [products, orders, inquiries] = await Promise.all([
+    const [products, orders, inquiries, fsSettings] = await Promise.all([
       fs.getProducts(),
       fs.getOrders(),
       fs.getInquiries(),
+      fs.getStoreSettings(),
     ]);
     set({ products, orders, inquiries });
+    if (fsSettings) {
+      set({ storeSettings: { ...DEFAULT_SETTINGS, ...fsSettings } });
+    }
   },
 }));

@@ -53,7 +53,7 @@ const Footer: React.FC = () => {
     </div>
 
     <div className="footer__bottom container">
-      <p>© {new Date().getFullYear()} Scentaura. All rights reserved.</p>
+      <p>© {new Date().getFullYear()} Zack's Perfume. All rights reserved.</p>
       <p>Cash on Delivery · Island-wide Delivery · Authentic Arabic Perfumes</p>
     </div>
   </footer>

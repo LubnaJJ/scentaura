@@ -29,7 +29,7 @@ const AdminLayout: React.FC = () => {
 
       <aside className={`admin-sidebar${sidebarOpen ? ' admin-sidebar--open' : ''}`}>
         <div className="admin-sidebar__logo">
-          <span>SCENTAURA</span>
+          <span>ZACK'S PERFUME</span>
           <span className="admin-sidebar__admin-badge">Admin</span>
         </div>
 
@@ -69,7 +69,7 @@ const AdminLayout: React.FC = () => {
           >
             {sidebarOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
-          <span className="admin-topbar__title">SCENTAURA Admin</span>
+          <span className="admin-topbar__title">ZACK'S PERFUME Admin</span>
         </div>
         <div className="admin-page-content">
           <Outlet />

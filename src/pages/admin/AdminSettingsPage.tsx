@@ -28,7 +28,7 @@ const AdminSettingsPage: React.FC = () => {
 
   const save = (updates: object, label: string) => {
     updateStoreSettings(updates);
-    toast.success(`${label} saved`);
+    toast.success(`${label} saved and synced to all devices`);
   };
 
   return (
@@ -132,7 +132,7 @@ const AdminSettingsPage: React.FC = () => {
               type="email"
               value={contact.contactEmail}
               onChange={(e) => setContact((s) => ({ ...s, contactEmail: e.target.value }))}
-              placeholder="hello@scentaura.lk"
+              placeholder="hello@zacksperfume.lk"
             />
           </div>
         </div>

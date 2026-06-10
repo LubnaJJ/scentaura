@@ -81,7 +81,7 @@ const CheckoutPage: React.FC = () => {
       .join('\n');
 
     const waMessage =
-      `Hi Scentaura! I just placed an order 🛍️\n\n` +
+      `Hi Zack's Perfume! I just placed an order 🛍️\n\n` +
       `Order ID: ${orderId}\n` +
       `Name: ${form.customerName}\n` +
       `Phone: ${form.customerPhone}\n` +

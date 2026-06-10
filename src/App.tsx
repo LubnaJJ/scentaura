@@ -1,14 +1,17 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { db } from './lib/firebase';
+import { StoreSettings } from './types';
+import { Toaster } from 'react-hot-toast';
+import { onAuthChange } from './lib/auth';
+import { useStore } from './store/useStore';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
   useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
   return null;
 }
-import { Toaster } from 'react-hot-toast';
-import { onAuthChange } from './lib/auth';
-import { useStore } from './store/useStore';
 
 // Layouts
 import CustomerLayout from './components/layout/CustomerLayout';
@@ -34,14 +37,27 @@ import AdminSettingsPage from './pages/admin/AdminSettingsPage';
 
 const App: React.FC = () => {
   useEffect(() => {
-    // Load products / orders / inquiries from Firestore (seeds if empty)
+    // Load products / orders / inquiries + Firestore settings on mount
     useStore.getState().initStore();
 
     // Mirror Firebase Auth state into the Zustand store
-    const unsubscribe = onAuthChange((user) => {
+    const unsubAuth = onAuthChange((user) => {
       useStore.setState({ isAdminLoggedIn: !!user, authLoading: false });
     });
-    return unsubscribe;
+
+    // Real-time listener — settings changes on any device update all clients instantly
+    const unsubSettings = onSnapshot(doc(db, 'settings', 'store'), (snap) => {
+      if (snap.exists()) {
+        const incoming = snap.data() as StoreSettings;
+        const current = useStore.getState().storeSettings;
+        useStore.setState({ storeSettings: { ...current, ...incoming } });
+      }
+    });
+
+    return () => {
+      unsubAuth();
+      unsubSettings();
+    };
   }, []);
 
   return (

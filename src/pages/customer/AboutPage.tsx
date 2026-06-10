@@ -36,7 +36,7 @@ const AboutPage: React.FC = () => (
           <p className="section__eyebrow">Who We Are</p>
           <h2 className="about__section-title">Born from a Passion for Authentic Fragrance</h2>
           <p className="about__body">
-            Scentaura was founded with a single vision: to give Sri Lanka's most discerning men
+            Zack's Perfume was founded with a single vision: to give Sri Lanka's most discerning men
             access to the same rare Arabic fragrances worn in the palaces and majlis of the Gulf.
           </p>
           <p className="about__body">

@@ -10,7 +10,7 @@ import {
   orderBy,
 } from 'firebase/firestore';
 import { db } from './firebase';
-import { Product, Order, Inquiry } from '../types';
+import { Product, Order, Inquiry, StoreSettings } from '../types';
 import { seedProducts } from '../utils/seedData';
 
 // ─── Products ────────────────────────────────────────────────────────────────
@@ -108,4 +108,18 @@ export async function addInquiry(inquiry: Inquiry): Promise<void> {
 
 export async function markInquiryRead(id: string): Promise<void> {
   await updateDoc(doc(db, 'inquiries', id), { read: true });
+}
+
+// ─── Store Settings ───────────────────────────────────────────────────────────
+
+export async function getStoreSettings(): Promise<StoreSettings | null> {
+  const snap = await getDoc(doc(db, 'settings', 'store'));
+  if (!snap.exists()) return null;
+  return snap.data() as StoreSettings;
+}
+
+export async function saveStoreSettings(
+  settings: Partial<StoreSettings>
+): Promise<void> {
+  await setDoc(doc(db, 'settings', 'store'), settings, { merge: true });
 }
