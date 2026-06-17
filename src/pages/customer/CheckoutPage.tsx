@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle, MessageCircle } from 'lucide-react';
 import { useStore } from '../../store/useStore';
@@ -8,7 +8,7 @@ import './CheckoutPage.css';
 
 const CheckoutPage: React.FC = () => {
   const navigate = useNavigate();
-  const { cart, cartTotal, addOrder, clearCart } = useStore();
+  const { cart, cartTotal, addOrder, clearCart, storeSettings } = useStore();
   const [submitted, setSubmitted] = useState(false);
   const [orderId, setOrderId] = useState('');
   const [orderTotal, setOrderTotal] = useState(0);
@@ -26,6 +26,11 @@ const CheckoutPage: React.FC = () => {
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Scroll to top after submit so success screen shows from the top
+  useEffect(() => {
+    if (submitted) window.scrollTo(0, 0);
+  }, [submitted]);
 
   const validate = () => {
     const errs: Record<string, string> = {};
@@ -69,7 +74,6 @@ const CheckoutPage: React.FC = () => {
     setOrderTotal(total);
     setOrderItems(items);
     setSubmitted(true);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   if (submitted) {
@@ -81,7 +85,7 @@ const CheckoutPage: React.FC = () => {
       .join('\n');
 
     const waMessage =
-      `Hi Zack's Perfume! I just placed an order 🛍️\n\n` +
+      `Hi ${storeSettings.storeName}! I just placed an order 🛍️\n\n` +
       `Order ID: ${orderId}\n` +
       `Name: ${form.customerName}\n` +
       `Phone: ${form.customerPhone}\n` +
@@ -96,11 +100,6 @@ const CheckoutPage: React.FC = () => {
         <div className="checkout-success">
           <CheckCircle size={56} className="checkout-success__icon" />
           <h1 className="checkout-success__title">Order Placed!</h1>
-          <p className="checkout-success__id">Order ID: <strong>{orderId}</strong></p>
-          <p className="checkout-success__body">
-            Your order has been received. To confirm it, please tap the button below
-            and send us the pre-filled WhatsApp message. We will confirm within minutes.
-          </p>
 
           <button
             className="checkout-success__wa-btn"
@@ -109,9 +108,11 @@ const CheckoutPage: React.FC = () => {
             <MessageCircle size={22} />
             Confirm Order on WhatsApp
           </button>
+
+          <p className="checkout-success__id">Order ID: <strong>{orderId}</strong></p>
           <p className="checkout-success__wa-note">
-            Tap the button above to send your order to us on WhatsApp.
-            We will confirm within minutes.
+            Tap the button above to send your order details to us on WhatsApp (+{storeSettings.whatsappNumber}).
+            We will confirm your order within minutes.
           </p>
 
           <button className="btn btn--outline-dark checkout-success__continue" onClick={() => navigate('/shop')}>

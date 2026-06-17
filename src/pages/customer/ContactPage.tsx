@@ -7,6 +7,7 @@ import './ContactPage.css';
 
 const ContactPage: React.FC = () => {
   const addInquiry = useStore((s) => s.addInquiry);
+  const storeSettings = useStore((s) => s.storeSettings);
   const [form, setForm] = useState({ name: '', email: '', phone: '', subject: '', message: '', method: 'email' as 'email' | 'whatsapp' });
   const [submitted, setSubmitted] = useState(false);
 
@@ -63,23 +64,23 @@ const ContactPage: React.FC = () => {
                 <MessageCircle size={22} />
                 <div>
                   <p className="contact__channel-label">WhatsApp (Fastest)</p>
-                  <p className="contact__channel-val">+94 77 123 4567</p>
+                  <p className="contact__channel-val">+{storeSettings.whatsappNumber}</p>
                 </div>
               </button>
 
-              <a href={`mailto:${CONTACT_EMAIL}`} className="contact__channel">
+              <a href={`mailto:${storeSettings.contactEmail}`} className="contact__channel">
                 <Mail size={22} />
                 <div>
                   <p className="contact__channel-label">Email</p>
-                  <p className="contact__channel-val">{CONTACT_EMAIL}</p>
+                  <p className="contact__channel-val">{storeSettings.contactEmail}</p>
                 </div>
               </a>
 
-              <a href="tel:+94771234567" className="contact__channel">
+              <a href={`tel:+${storeSettings.whatsappNumber}`} className="contact__channel">
                 <Phone size={22} />
                 <div>
                   <p className="contact__channel-label">Phone</p>
-                  <p className="contact__channel-val">+94 77 123 4567</p>
+                  <p className="contact__channel-val">+{storeSettings.whatsappNumber}</p>
                 </div>
               </a>
 
