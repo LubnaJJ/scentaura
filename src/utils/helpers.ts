@@ -22,8 +22,17 @@ export const CONTACT_EMAIL = 'hello@zacksperfume.lk';
 
 export const openWhatsApp = (message: string) => {
   const { storeSettings } = useStore.getState();
-  const number = storeSettings?.whatsappNumber || WHATSAPP_NUMBER;
-  window.open(`https://wa.me/${number}?text=${encodeURIComponent(message)}`, '_blank');
+  const raw = storeSettings?.whatsappNumber || WHATSAPP_NUMBER;
+  // Strip all non-digits; convert local format 0xxxxxxxxx → 94xxxxxxxxx
+  let number = raw.replace(/\D/g, '');
+  if (number.startsWith('0')) number = '94' + number.slice(1);
+  const url = `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
+  // Anchor click is more reliable than window.open on mobile
+  const a = document.createElement('a');
+  a.href = url;
+  a.target = '_blank';
+  a.rel = 'noopener noreferrer';
+  a.click();
 };
 
 export const STATUS_LABELS: Record<string, string> = {
