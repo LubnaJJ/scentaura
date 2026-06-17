@@ -17,11 +17,17 @@
 }
 
 .admin-sidebar__logo {
-  padding: 28px 24px 24px;
+  padding: 28px 24px 20px;
   border-bottom: 1px solid rgba(255,255,255,0.08);
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
+}
+
+.admin-sidebar__logo-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .admin-sidebar__logo span:first-child {
@@ -39,6 +45,59 @@
   color: rgba(255,255,255,0.4) !important;
   font-family: var(--font-body) !important;
   font-weight: 400 !important;
+}
+
+/* ── Live pill ────────────────────────────────────────────────────────────── */
+.admin-live-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-family: var(--font-body);
+  white-space: nowrap;
+}
+
+.admin-live-pill--on {
+  background: rgba(76, 175, 80, 0.18);
+  color: #4CAF50;
+}
+
+.admin-live-pill--off {
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.admin-live-pill__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.admin-live-pill--on .admin-live-pill__dot {
+  background: #4CAF50;
+  animation: livePulse 2s ease-in-out infinite;
+}
+
+.admin-live-pill--off .admin-live-pill__dot {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.admin-live-pill--topbar {
+  margin-left: auto;
+  background: transparent;
+  border: 1px solid currentColor;
+  opacity: 0.75;
+}
+
+@keyframes livePulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.5); }
+  50%       { box-shadow: 0 0 0 4px rgba(76, 175, 80, 0); }
 }
 
 .admin-sidebar__nav {

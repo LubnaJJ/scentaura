@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import toast from 'react-hot-toast';
 import { CartItem, Product, Order, Inquiry, StoreSettings } from '../types';
 import * as fs from '../lib/firestore';
 import { adminLogin as fbLogin, adminLogout as fbLogout } from '../lib/auth';
@@ -9,7 +10,7 @@ const DEFAULT_SETTINGS: StoreSettings = {
   heroTitle: 'Wear the Soul of Arabia',
   heroSubtitle: 'Authentic Arabic fragrances, curated for the man who commands presence. Rare Ouds, sacred Ambers, and precious Musks — delivered to your door.',
   heroEyebrow: 'Arabian Perfumery · Sri Lanka',
-  whatsappNumber: '94771770771',
+  whatsappNumber: '94779196491',
   contactEmail: 'hello@zacksperfume.lk',
   footerTagline: 'Curating the finest Arabic fragrances for the discerning man in Sri Lanka.',
 };
@@ -72,19 +73,28 @@ export const useStore = create<StoreState>()((set, get) => ({
   // ── Products ────────────────────────────────────────────────────────────
   addProduct: (product) => {
     set((s) => ({ products: [...s.products, product] }));
-    fs.addProduct(product).catch(console.error);
+    fs.addProduct(product).catch((err) => {
+      console.error('[addProduct]', err);
+      toast.error('Failed to save product to Firestore');
+    });
   },
 
   updateProduct: (id, updates) => {
     set((s) => ({
       products: s.products.map((p) => (p.id === id ? { ...p, ...updates } : p)),
     }));
-    fs.updateProduct(id, updates).catch(console.error);
+    fs.updateProduct(id, updates).catch((err) => {
+      console.error('[updateProduct]', err);
+      toast.error('Failed to update product');
+    });
   },
 
   deleteProduct: (id) => {
     set((s) => ({ products: s.products.filter((p) => p.id !== id) }));
-    fs.deleteProduct(id).catch(console.error);
+    fs.deleteProduct(id).catch((err) => {
+      console.error('[deleteProduct]', err);
+      toast.error('Failed to delete product');
+    });
   },
 
   // ── Cart ────────────────────────────────────────────────────────────────
@@ -141,7 +151,6 @@ export const useStore = create<StoreState>()((set, get) => ({
     (async () => {
       try {
         await fs.addOrder(order);
-        // Decrement stock for each ordered item and reflect in local state
         for (const item of order.items) {
           const result = await fs.decrementStock(item.product.id, item.quantity);
           set((s) => ({
@@ -153,7 +162,8 @@ export const useStore = create<StoreState>()((set, get) => ({
           }));
         }
       } catch (err) {
-        console.error('addOrder error:', err);
+        console.error('[addOrder]', err);
+        toast.error('Order placed locally but failed to sync — please contact support');
       }
     })();
   },
@@ -164,13 +174,19 @@ export const useStore = create<StoreState>()((set, get) => ({
         o.id === id ? { ...o, status, updatedAt: new Date().toISOString() } : o
       ),
     }));
-    fs.updateOrderStatus(id, status).catch(console.error);
+    fs.updateOrderStatus(id, status).catch((err) => {
+      console.error('[updateOrderStatus]', err);
+      toast.error('Failed to update order status');
+    });
   },
 
   // ── Inquiries ───────────────────────────────────────────────────────────
   addInquiry: (inquiry) => {
     set((s) => ({ inquiries: [inquiry, ...s.inquiries] }));
-    fs.addInquiry(inquiry).catch(console.error);
+    fs.addInquiry(inquiry).catch((err) => {
+      console.error('[addInquiry]', err);
+      toast.error('Failed to send inquiry — please try again');
+    });
   },
 
   markInquiryRead: (id) => {
@@ -179,14 +195,19 @@ export const useStore = create<StoreState>()((set, get) => ({
         i.id === id ? { ...i, read: true } : i
       ),
     }));
-    fs.markInquiryRead(id).catch(console.error);
+    fs.markInquiryRead(id).catch((err) => {
+      console.error('[markInquiryRead]', err);
+    });
   },
 
   // ── Settings ────────────────────────────────────────────────────────────
   updateStoreSettings: (updates) => {
     set((s) => {
       const next = { ...s.storeSettings, ...updates };
-      fs.saveStoreSettings(next).catch(console.error);
+      fs.saveStoreSettings(next).catch((err) => {
+        console.error('[saveStoreSettings]', err);
+        toast.error('Failed to sync settings to cloud');
+      });
       return { storeSettings: next };
     });
   },

@@ -1,17 +1,55 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { db } from '../../lib/firebase';
 import { LayoutDashboard, Package, ShoppingBag, MessageSquare, Settings, LogOut, Menu, X } from 'lucide-react';
 import { useStore } from '../../store/useStore';
+import { Order, Inquiry } from '../../types';
 import toast from 'react-hot-toast';
 import './AdminLayout.css';
 
 const AdminLayout: React.FC = () => {
-  const { adminLogout, orders, inquiries } = useStore();
+  const { adminLogout, orders, inquiries, storeSettings } = useStore();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isLive, setIsLive] = useState(false);
 
-  const pendingOrders = orders.filter((o) => o.status === 'pending').length;
-  const unreadInquiries = inquiries.filter((i) => !i.read).length;
+  const pendingOrders    = orders.filter((o) => o.status === 'pending').length;
+  const unreadInquiries  = inquiries.filter((i) => !i.read).length;
+
+  // Real-time listeners — orders and inquiries update instantly for admin
+  useEffect(() => {
+    const unsubOrders = onSnapshot(
+      query(collection(db, 'orders'), orderBy('createdAt', 'desc')),
+      (snap) => {
+        setIsLive(true);
+        const updated = snap.docs.map((d) => ({ ...d.data(), id: d.id } as Order));
+        useStore.setState({ orders: updated });
+      },
+      (err) => {
+        console.error('[orders onSnapshot]', err);
+        setIsLive(false);
+        toast.error('Lost connection to orders feed');
+      }
+    );
+
+    const unsubInquiries = onSnapshot(
+      query(collection(db, 'inquiries'), orderBy('createdAt', 'desc')),
+      (snap) => {
+        const updated = snap.docs.map((d) => ({ ...d.data(), id: d.id } as Inquiry));
+        useStore.setState({ inquiries: updated });
+      },
+      (err) => {
+        console.error('[inquiries onSnapshot]', err);
+        toast.error('Lost connection to inquiries feed');
+      }
+    );
+
+    return () => {
+      unsubOrders();
+      unsubInquiries();
+    };
+  }, []);
 
   const handleLogout = () => {
     adminLogout();
@@ -29,8 +67,14 @@ const AdminLayout: React.FC = () => {
 
       <aside className={`admin-sidebar${sidebarOpen ? ' admin-sidebar--open' : ''}`}>
         <div className="admin-sidebar__logo">
-          <span>ZACK'S PERFUME</span>
-          <span className="admin-sidebar__admin-badge">Admin</span>
+          <span>{storeSettings.storeName}</span>
+          <div className="admin-sidebar__logo-row">
+            <span className="admin-sidebar__admin-badge">Admin</span>
+            <span className={`admin-live-pill ${isLive ? 'admin-live-pill--on' : 'admin-live-pill--off'}`}>
+              <span className="admin-live-pill__dot" />
+              {isLive ? 'Live' : 'Connecting…'}
+            </span>
+          </div>
         </div>
 
         <nav className="admin-sidebar__nav">
@@ -69,7 +113,11 @@ const AdminLayout: React.FC = () => {
           >
             {sidebarOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
-          <span className="admin-topbar__title">ZACK'S PERFUME Admin</span>
+          <span className="admin-topbar__title">{storeSettings.storeName} Admin</span>
+          <span className={`admin-live-pill admin-live-pill--topbar ${isLive ? 'admin-live-pill--on' : 'admin-live-pill--off'}`}>
+            <span className="admin-live-pill__dot" />
+            {isLive ? 'Live' : 'Connecting…'}
+          </span>
         </div>
         <div className="admin-page-content">
           <Outlet />

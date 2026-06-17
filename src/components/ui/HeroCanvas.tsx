@@ -61,10 +61,11 @@ function makeBottleLabel(): {
   ctx.font = '300 42px serif';
   const word    = 'PERFUME';
   const gap     = 9;
-  const widths  = [...word].map(ch => ctx.measureText(ch).width);
-  const totalW  = widths.reduce((a, b) => a + b, 0) + gap * (word.length - 1);
+  const chars   = word.split('');
+  const widths  = chars.map(ch => ctx.measureText(ch).width);
+  const totalW  = widths.reduce((a, b) => a + b, 0) + gap * (chars.length - 1);
   let cx = 256 - totalW / 2;
-  [...word].forEach((ch, k) => {
+  chars.forEach((ch, k) => {
     ctx.fillText(ch, cx + widths[k] / 2, 300);
     cx += widths[k] + gap;
   });

@@ -1,17 +1,11 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { doc, onSnapshot } from 'firebase/firestore';
+import { collection, doc, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { db } from './lib/firebase';
-import { StoreSettings } from './types';
+import { StoreSettings, Product, Order, Inquiry } from './types';
 import { Toaster } from 'react-hot-toast';
 import { onAuthChange } from './lib/auth';
 import { useStore } from './store/useStore';
-
-function ScrollToTop() {
-  const { pathname } = useLocation();
-  useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
-  return null;
-}
 
 // Layouts
 import CustomerLayout from './components/layout/CustomerLayout';
@@ -35,28 +29,49 @@ import AdminOrdersPage from './pages/admin/AdminOrdersPage';
 import AdminInquiriesPage from './pages/admin/AdminInquiriesPage';
 import AdminSettingsPage from './pages/admin/AdminSettingsPage';
 
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
+  return null;
+}
+
 const App: React.FC = () => {
   useEffect(() => {
-    // Load products / orders / inquiries + Firestore settings on mount
+    // One-time load of all Firestore data on mount
     useStore.getState().initStore();
 
-    // Mirror Firebase Auth state into the Zustand store
+    // Auth state → Zustand
     const unsubAuth = onAuthChange((user) => {
       useStore.setState({ isAdminLoggedIn: !!user, authLoading: false });
     });
 
-    // Real-time listener — settings changes on any device update all clients instantly
-    const unsubSettings = onSnapshot(doc(db, 'settings', 'store'), (snap) => {
-      if (snap.exists()) {
-        const incoming = snap.data() as StoreSettings;
-        const current = useStore.getState().storeSettings;
-        useStore.setState({ storeSettings: { ...current, ...incoming } });
-      }
-    });
+    // Real-time: settings — updates all open tabs/devices instantly
+    const unsubSettings = onSnapshot(
+      doc(db, 'settings', 'store'),
+      (snap) => {
+        if (snap.exists()) {
+          const incoming = snap.data() as StoreSettings;
+          const current = useStore.getState().storeSettings;
+          useStore.setState({ storeSettings: { ...current, ...incoming } });
+        }
+      },
+      (err) => console.error('[settings onSnapshot]', err)
+    );
+
+    // Real-time: products — customer pages stay fresh if admin edits stock/price
+    const unsubProducts = onSnapshot(
+      collection(db, 'products'),
+      (snap) => {
+        const products = snap.docs.map((d) => ({ ...d.data(), id: d.id } as Product));
+        useStore.setState({ products });
+      },
+      (err) => console.error('[products onSnapshot]', err)
+    );
 
     return () => {
       unsubAuth();
       unsubSettings();
+      unsubProducts();
     };
   }, []);
 
@@ -72,6 +87,7 @@ const App: React.FC = () => {
             border: '1px solid #E8D5A3',
           },
           success: { iconTheme: { primary: '#C9A84C', secondary: '#fff' } },
+          error: { iconTheme: { primary: '#e53935', secondary: '#fff' } },
         }}
       />
 
@@ -88,10 +104,10 @@ const App: React.FC = () => {
           <Route path="/contact" element={<ContactPage />} />
         </Route>
 
-        {/* Admin login — standalone, no layout wrapper */}
+        {/* Admin login — standalone */}
         <Route path="/admin" element={<AdminLoginPage />} />
 
-        {/* Admin routes — protected, use AdminLayout sidebar */}
+        {/* Admin routes — protected */}
         <Route
           path="/admin"
           element={
@@ -107,7 +123,6 @@ const App: React.FC = () => {
           <Route path="settings" element={<AdminSettingsPage />} />
         </Route>
 
-        {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
