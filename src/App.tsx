@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { collection, doc, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { db } from './lib/firebase';
+import { initDefaultSettings } from './lib/firestore';
 import { StoreSettings, Product, Order, Inquiry } from './types';
 import { Toaster } from 'react-hot-toast';
 import { onAuthChange } from './lib/auth';
@@ -38,6 +39,7 @@ function ScrollToTop() {
 const App: React.FC = () => {
   useEffect(() => {
     // One-time load of all Firestore data on mount
+    initDefaultSettings().catch((err) => console.error('[initDefaultSettings]', err));
     useStore.getState().initStore();
 
     // Auth state → Zustand

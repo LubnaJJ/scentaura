@@ -7,27 +7,28 @@ import './AdminOrdersPage.css';
 
 const ALL_STATUSES: OrderStatus[] = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'];
 
-function buildStatusMessage(o: Order): string {
+function buildStatusMessage(o: Order, storeName: string): string {
   switch (o.status) {
     case 'pending':
-      return `Hi ${o.customerName}! We received your Zack's Perfume order ${o.id} for ${formatPrice(o.total)}. We will deliver to ${o.district} soon. Thank you!`;
+      return `Hi ${o.customerName}! We received your ${storeName} order ${o.id} for ${formatPrice(o.total)}. We will deliver to ${o.district} soon. Thank you!`;
     case 'confirmed':
-      return `Hi ${o.customerName}! Your Zack's Perfume order ${o.id} has been confirmed. We are preparing it now. Thank you!`;
+      return `Hi ${o.customerName}! Your ${storeName} order ${o.id} has been confirmed. We are preparing it now. Thank you!`;
     case 'processing':
-      return `Hi ${o.customerName}! Your Zack's Perfume order ${o.id} is currently being processed and packed. We will notify you once it ships. Thank you!`;
+      return `Hi ${o.customerName}! Your ${storeName} order ${o.id} is currently being processed and packed. We will notify you once it ships. Thank you!`;
     case 'shipped':
-      return `Hi ${o.customerName}! Your Zack's Perfume order ${o.id} has been shipped and is on the way to ${o.district}. Please have ${formatPrice(o.total)} ready for Cash on Delivery. Thank you!`;
+      return `Hi ${o.customerName}! Your ${storeName} order ${o.id} has been shipped and is on the way to ${o.district}. Please have ${formatPrice(o.total)} ready for Cash on Delivery. Thank you!`;
     case 'delivered':
-      return `Hi ${o.customerName}! We hope you received your Zack's Perfume order ${o.id}. Thank you for shopping with us! 🌟`;
+      return `Hi ${o.customerName}! We hope you received your ${storeName} order ${o.id}. Thank you for shopping with us! 🌟`;
     case 'cancelled':
-      return `Hi ${o.customerName}! Unfortunately your Zack's Perfume order ${o.id} has been cancelled. Please contact us for more details.`;
+      return `Hi ${o.customerName}! Unfortunately your ${storeName} order ${o.id} has been cancelled. Please contact us for more details.`;
     default:
-      return `Hi ${o.customerName}! Regarding your Zack's Perfume order ${o.id}.`;
+      return `Hi ${o.customerName}! Regarding your ${storeName} order ${o.id}.`;
   }
 }
 
 const AdminOrdersPage: React.FC = () => {
-  const { orders, updateOrderStatus } = useStore();
+  const { orders, updateOrderStatus, storeSettings } = useStore();
+  const storeName = storeSettings.storeName;
   const [filter, setFilter] = useState<OrderStatus | 'all'>('all');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
@@ -116,7 +117,7 @@ const AdminOrdersPage: React.FC = () => {
                       <button
                         className="admin-action-btn admin-action-btn--wa"
                         title="WhatsApp customer"
-                        onClick={() => openWhatsApp(buildStatusMessage(o))}
+                        onClick={() => openWhatsApp(buildStatusMessage(o, storeName))}
                       >
                         <MessageCircle size={14} />
                       </button>

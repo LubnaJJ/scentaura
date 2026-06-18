@@ -132,7 +132,7 @@ const AdminSettingsPage: React.FC = () => {
               type="email"
               value={contact.contactEmail}
               onChange={(e) => setContact((s) => ({ ...s, contactEmail: e.target.value }))}
-              placeholder="hello@zacksperfume.lk"
+              placeholder="hello@zackssignature.com"
             />
           </div>
         </div>

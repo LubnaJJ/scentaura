@@ -123,3 +123,20 @@ export async function saveStoreSettings(
 ): Promise<void> {
   await setDoc(doc(db, 'settings', 'store'), settings, { merge: true });
 }
+
+// Creates the settings document with defaults only if it doesn't already exist.
+export async function initDefaultSettings(): Promise<void> {
+  const ref = doc(db, 'settings', 'store');
+  const snap = await getDoc(ref);
+  if (snap.exists()) return;
+  await setDoc(ref, {
+    storeName: 'Zacks Signature',
+    storeTagline: 'Arabian Fragrances',
+    heroTitle: 'Wear the Soul of Arabia',
+    heroEyebrow: 'Arabian Perfumery · Sri Lanka',
+    heroSubtitle: 'Rare Ouds. Sacred Ambers. Precious Musks.',
+    whatsappNumber: '94771770771',
+    contactEmail: 'hello@zackssignature.com',
+    footerTagline: 'Curating the finest Arabic fragrances for the discerning man in Sri Lanka.',
+  });
+}

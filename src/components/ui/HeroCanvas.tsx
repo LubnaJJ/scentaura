@@ -54,12 +54,12 @@ function makeBottleLabel(): {
   ctx.font = '800 80px serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'alphabetic';
-  ctx.fillText("ZACK'S", 256, 242);
+  ctx.fillText('ZACKS', 256, 242);
 
-  // "PERFUME" with manual letter spacing (TypeScript 4.9 has no ctx.letterSpacing)
+  // "SIGNATURE" with manual letter spacing (TypeScript 4.9 has no ctx.letterSpacing)
   ctx.fillStyle = 'rgba(201, 168, 76, 0.9)';
-  ctx.font = '300 42px serif';
-  const word    = 'PERFUME';
+  ctx.font = '300 36px serif';
+  const word    = 'SIGNATURE';
   const gap     = 9;
   const chars   = word.split('');
   const widths  = chars.map(ch => ctx.measureText(ch).width);

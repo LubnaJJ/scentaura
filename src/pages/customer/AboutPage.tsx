@@ -2,9 +2,12 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight, MapPin, Package, Star, Users } from 'lucide-react';
+import { useStore } from '../../store/useStore';
 import './AboutPage.css';
 
-const AboutPage: React.FC = () => (
+const AboutPage: React.FC = () => {
+  const storeName = useStore((s) => s.storeSettings.storeName);
+  return (
   <div className="about">
     {/* Hero */}
     <section className="about__hero">
@@ -36,7 +39,7 @@ const AboutPage: React.FC = () => (
           <p className="section__eyebrow">Who We Are</p>
           <h2 className="about__section-title">Born from a Passion for Authentic Fragrance</h2>
           <p className="about__body">
-            Zack's Perfume was founded with a single vision: to give Sri Lanka's most discerning men
+            {storeName} was founded with a single vision: to give Sri Lanka's most discerning men
             access to the same rare Arabic fragrances worn in the palaces and majlis of the Gulf.
           </p>
           <p className="about__body">
@@ -123,5 +126,7 @@ const AboutPage: React.FC = () => (
     </section>
   </div>
 );
+
+};
 
 export default AboutPage;

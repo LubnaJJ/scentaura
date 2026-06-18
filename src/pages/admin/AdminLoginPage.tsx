@@ -11,6 +11,7 @@ const AdminLoginPage: React.FC = () => {
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const adminLogin = useStore((s) => s.adminLogin);
+  const storeName = useStore((s) => s.storeSettings.storeName);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -29,7 +30,7 @@ const AdminLoginPage: React.FC = () => {
   return (
     <div className="admin-login">
       <div className="admin-login__card">
-        <div className="admin-login__logo">ZACK'S PERFUME</div>
+        <div className="admin-login__logo">{storeName}</div>
         <p className="admin-login__sub">Admin Portal</p>
         <div className="admin-login__icon-wrap">
           <Lock size={28} />
@@ -42,7 +43,7 @@ const AdminLoginPage: React.FC = () => {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@zacksperfume.lk"
+              placeholder="admin@zackssignature.com"
               autoComplete="email"
               required
             />

@@ -17,8 +17,8 @@ export const formatDate = (iso: string): string =>
 
 // Fallback constants — used before store initialises
 export const WHATSAPP_NUMBER = '94779196491';
-export const ADMIN_EMAIL = 'admin@zacksperfume.lk';
-export const CONTACT_EMAIL = 'hello@zacksperfume.lk';
+export const ADMIN_EMAIL = 'admin@zackssignature.com';
+export const CONTACT_EMAIL = 'hello@zackssignature.com';
 
 export const openWhatsApp = (message: string) => {
   const { storeSettings } = useStore.getState();

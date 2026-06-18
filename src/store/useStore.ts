@@ -5,13 +5,13 @@ import * as fs from '../lib/firestore';
 import { adminLogin as fbLogin, adminLogout as fbLogout } from '../lib/auth';
 
 const DEFAULT_SETTINGS: StoreSettings = {
-  storeName: "ZACK'S PERFUME",
+  storeName: 'Zacks Signature',
   storeTagline: 'Arabian Fragrances',
   heroTitle: 'Wear the Soul of Arabia',
   heroSubtitle: 'Authentic Arabic fragrances, curated for the man who commands presence. Rare Ouds, sacred Ambers, and precious Musks — delivered to your door.',
   heroEyebrow: 'Arabian Perfumery · Sri Lanka',
   whatsappNumber: '94779196491',
-  contactEmail: 'hello@zacksperfume.lk',
+  contactEmail: 'hello@zackssignature.com',
   footerTagline: 'Curating the finest Arabic fragrances for the discerning man in Sri Lanka.',
 };
 
