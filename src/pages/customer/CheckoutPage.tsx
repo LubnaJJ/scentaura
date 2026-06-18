@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { CheckCircle, MessageCircle } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { CheckCircle, MessageCircle, Search } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import { formatPrice, generateId, openWhatsApp, SRI_LANKA_DISTRICTS } from '../../utils/helpers';
 import toast from 'react-hot-toast';
@@ -108,6 +108,14 @@ const CheckoutPage: React.FC = () => {
             <MessageCircle size={22} />
             Confirm Order on WhatsApp
           </button>
+
+          <Link
+            to={`/track?orderId=${orderId}`}
+            className="checkout-success__track-btn"
+          >
+            <Search size={16} />
+            Track Your Order
+          </Link>
 
           <p className="checkout-success__id">Order ID: <strong>{orderId}</strong></p>
           <p className="checkout-success__wa-note">

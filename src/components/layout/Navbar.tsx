@@ -37,6 +37,7 @@ const Navbar: React.FC = () => {
           <li><Link to="/shop" className={location.pathname === '/shop' ? 'active' : ''}>Shop</Link></li>
           <li><Link to="/about" className={location.pathname === '/about' ? 'active' : ''}>About</Link></li>
           <li><Link to="/contact" className={location.pathname === '/contact' ? 'active' : ''}>Contact</Link></li>
+          <li><Link to="/track" className={location.pathname === '/track' ? 'active' : ''}>Track Order</Link></li>
         </ul>
 
         <div className="navbar__actions">
@@ -60,6 +61,7 @@ const Navbar: React.FC = () => {
           <Link to="/shop">Shop</Link>
           <Link to="/about">About</Link>
           <Link to="/contact">Contact</Link>
+          <Link to="/track">Track Order</Link>
           <Link to="/cart">Cart {cartCount > 0 && `(${cartCount})`}</Link>
         </div>
       )}

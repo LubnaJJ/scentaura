@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { ChevronDown, Phone, MessageCircle, X } from 'lucide-react';
+import { ChevronDown, Phone, MessageCircle, X, CheckCircle } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { useStore } from '../../store/useStore';
 import { formatPrice, formatDate, STATUS_COLORS, STATUS_LABELS, openWhatsApp } from '../../utils/helpers';
 import { Order, OrderStatus } from '../../types';
@@ -189,8 +190,44 @@ const AdminOrdersPage: React.FC = () => {
               </div>
 
               <div className="order-drawer__section">
-                <p className="order-drawer__section-title">Update Status</p>
-                <div className="order-drawer__statuses">
+                <p className="order-drawer__section-title">Actions</p>
+
+                {/* Confirm Order — big gold CTA when pending */}
+                {selectedOrder.status === 'pending' && (
+                  <button
+                    className="confirm-order-btn"
+                    onClick={() => { handleStatusChange(selectedOrder.id, 'confirmed'); toast.success('Order confirmed!'); }}
+                  >
+                    <CheckCircle size={18} /> Confirm Order
+                  </button>
+                )}
+
+                {/* Quick-action next-step buttons */}
+                <div className="order-action-btns">
+                  {selectedOrder.status === 'confirmed' && (
+                    <>
+                      <button className="order-action-btn" onClick={() => handleStatusChange(selectedOrder.id, 'processing')}>
+                        Mark as Processing
+                      </button>
+                      <button className="order-action-btn" onClick={() => handleStatusChange(selectedOrder.id, 'shipped')}>
+                        Mark as Shipped
+                      </button>
+                    </>
+                  )}
+                  {selectedOrder.status === 'processing' && (
+                    <button className="order-action-btn" onClick={() => handleStatusChange(selectedOrder.id, 'shipped')}>
+                      Mark as Shipped
+                    </button>
+                  )}
+                  {selectedOrder.status === 'shipped' && (
+                    <button className="order-action-btn" onClick={() => handleStatusChange(selectedOrder.id, 'delivered')}>
+                      Mark as Delivered
+                    </button>
+                  )}
+                </div>
+
+                {/* Full status picker for manual override */}
+                <div className="order-drawer__statuses" style={{ marginTop: 12 }}>
                   {ALL_STATUSES.map((s) => (
                     <button
                       key={s}
@@ -207,7 +244,7 @@ const AdminOrdersPage: React.FC = () => {
               <div className="order-drawer__contacts">
                 <button
                   className="order-contact-btn order-contact-btn--wa"
-                  onClick={() => openWhatsApp(buildStatusMessage(selectedOrder))}
+                  onClick={() => openWhatsApp(buildStatusMessage(selectedOrder, storeName))}
                 >
                   <MessageCircle size={16} /> WhatsApp Customer
                 </button>

@@ -35,6 +35,7 @@ const Footer: React.FC = () => {
         <h4>Information</h4>
         <Link to="/about">About Us</Link>
         <Link to="/contact">Contact</Link>
+        <Link to="/track">Track Order</Link>
         <Link to="/cart">Your Cart</Link>
       </div>
 

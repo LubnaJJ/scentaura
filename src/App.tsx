@@ -21,6 +21,7 @@ import CartPage from './pages/customer/CartPage';
 import CheckoutPage from './pages/customer/CheckoutPage';
 import AboutPage from './pages/customer/AboutPage';
 import ContactPage from './pages/customer/ContactPage';
+import TrackOrderPage from './pages/customer/TrackOrderPage';
 
 // Admin pages
 import AdminLoginPage from './pages/admin/AdminLoginPage';
@@ -104,6 +105,7 @@ const App: React.FC = () => {
           <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<ContactPage />} />
+          <Route path="/track" element={<TrackOrderPage />} />
         </Route>
 
         {/* Admin login — standalone */}

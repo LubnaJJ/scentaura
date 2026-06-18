@@ -85,6 +85,34 @@
   transform: translateY(0);
 }
 
+.checkout-success__track-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 13px 24px;
+  background: transparent;
+  color: var(--gold-dark);
+  border: 1px solid var(--gold);
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  margin-bottom: 12px;
+  transition: background 0.2s, color 0.2s, transform 0.1s;
+}
+
+.checkout-success__track-btn:hover {
+  background: var(--gold);
+  color: var(--white);
+  transform: translateY(-1px);
+}
+
 .checkout-success__wa-note {
   font-size: 12px;
   color: var(--warm-gray);
