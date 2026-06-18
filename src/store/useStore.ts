@@ -15,6 +15,21 @@ const DEFAULT_SETTINGS: StoreSettings = {
   footerTagline: 'Curating the finest Arabic fragrances for the discerning man in Sri Lanka.',
 };
 
+const SETTINGS_CACHE_KEY = 'zs_settings_cache';
+
+function loadCachedSettings(): Partial<StoreSettings> {
+  try {
+    const raw = localStorage.getItem(SETTINGS_CACHE_KEY);
+    return raw ? (JSON.parse(raw) as Partial<StoreSettings>) : {};
+  } catch {
+    return {};
+  }
+}
+
+export function writeSettingsCache(settings: StoreSettings): void {
+  try { localStorage.setItem(SETTINGS_CACHE_KEY, JSON.stringify(settings)); } catch {}
+}
+
 interface StoreState {
   // Data
   products: Product[];
@@ -68,7 +83,7 @@ export const useStore = create<StoreState>()((set, get) => ({
   cart: [],
   isAdminLoggedIn: false,
   authLoading: true,
-  storeSettings: { ...DEFAULT_SETTINGS },
+  storeSettings: { ...DEFAULT_SETTINGS, ...loadCachedSettings() },
 
   // ── Products ────────────────────────────────────────────────────────────
   addProduct: (product) => {
@@ -204,6 +219,7 @@ export const useStore = create<StoreState>()((set, get) => ({
   updateStoreSettings: (updates) => {
     set((s) => {
       const next = { ...s.storeSettings, ...updates };
+      writeSettingsCache(next);
       fs.saveStoreSettings(next).catch((err) => {
         console.error('[saveStoreSettings]', err);
         toast.error('Failed to sync settings to cloud');

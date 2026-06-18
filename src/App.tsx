@@ -6,7 +6,7 @@ import { initDefaultSettings } from './lib/firestore';
 import { StoreSettings, Product, Order, Inquiry } from './types';
 import { Toaster } from 'react-hot-toast';
 import { onAuthChange } from './lib/auth';
-import { useStore } from './store/useStore';
+import { useStore, writeSettingsCache } from './store/useStore';
 
 // Layouts
 import CustomerLayout from './components/layout/CustomerLayout';
@@ -55,7 +55,9 @@ const App: React.FC = () => {
         if (snap.exists()) {
           const incoming = snap.data() as StoreSettings;
           const current = useStore.getState().storeSettings;
-          useStore.setState({ storeSettings: { ...current, ...incoming } });
+          const merged = { ...current, ...incoming };
+          useStore.setState({ storeSettings: merged });
+          writeSettingsCache(merged);
         }
       },
       (err) => console.error('[settings onSnapshot]', err)
